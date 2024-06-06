@@ -30,7 +30,7 @@ Let's make our app feel more cohesive with the operating system by respecting th
 
 ## Side Quests
 
-- Add any extra
+- Add any extra stuff to do here
 
 ## See the solution
 
