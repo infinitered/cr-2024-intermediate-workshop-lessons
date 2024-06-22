@@ -198,6 +198,29 @@ module.exports = {
 
 4. Copy the contents [widgets.swift](files/05/ios/widgets.swift) into the **target/widgets/widgets.swift** file.
 
+This file defines the SwiftUI code for our widget. This one is the default file XCode would generate for you if you made a widget in there. We'll come back to this.
+
+5. Create **target/widgets/index.swift** and paste in the following:
+
+```swift
+import WidgetKit
+import SwiftUI
+
+@main
+struct exportWidgets: WidgetBundle {
+    var body: some Widget {
+        // Export widgets here
+        HelloWidget()
+    }
+}
+```
+
+This is where you tell XCode what code you're using to generate your widgets.
+
+🏃**Try it.** Run `npx expo prebuild --clean` and `npx expo run:ios`. You should be able to find your widget by pressing the "+" button on the widgets panel and typing in "Ignite" in the search (they don't populate on the simulator by default, not sure why).
+
+You'll see some new files show up in **target/widgets**. This happens on Prebuild via `expo-apple-targets`. It turns that **expo-target.config.js** file into files needed by XCode for widget integration.
+
 ## Exercise 2: Widget data sharing
 
 ## Exercise 3(a): Scrolling podcast display widget on Android
