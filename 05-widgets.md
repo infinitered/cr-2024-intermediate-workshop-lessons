@@ -221,11 +221,90 @@ This is where you tell XCode what code you're using to generate your widgets.
 
 You'll see some new files show up in **target/widgets**. This happens on Prebuild via `expo-apple-targets`. It turns that **expo-target.config.js** file into files needed by XCode for widget integration.
 
-## Exercise 2: Widget data sharing
+## Exercise 2: Getting ready for widget data flow
 
-## Exercise 3(a): Scrolling podcast display widget on Android
+Our actual widget is going to display favorited episodes of the podcast. It will be a little different for Android and iOS, due to the different features widgets offer on each platform. The data will be refreshed a little differently on each platform, as well, but it needs to be refreshed at the same time.
 
-## Exercise 3(i): Whatever we're doing on iOS!
+So, let's make a stub function for refreshing the widget whenever your app data changes, so we'll be ready to drop code in there as we add each widget. We'll call the stub at each point where we want to refresh the data, which is when a) the favorites change, or b) at some other convenient point, so any code changes to the widget can be picked up ASAP (e.g., on app foreground).
+
+1. Create **src/widgets/widget-refresher.tsx**, and add this code:
+
+```tsx
+import { Platform } from "react-native"
+import { Episode } from "src/models/Episode"
+
+export const updateEpisodesWidget = (episodes: Episode[]) => {
+  if (Platform.OS === "android") {
+    // refresh android widget here
+  }
+  if (Platform.OS === "ios") {
+    // refresh iOS widget here
+  }
+}
+```
+
+2. In **EpisodeModel.ts**, import the refresh function:
+
+```ts
+import { updateEpisodesWidget } from "../widgets/widget-refresher"
+```
+
+and call it when updating favorites:
+
+```diff
+addFavorite(episode: Episode) {
+  store.favorites.push(episode)
++  updateEpisodesWidget(store.favorites.slice())
+},
+removeFavorite(episode: Episode) {
+  store.favorites.remove(episode)
++  updateEpisodesWidget(store.favorites.slice())
+},
+```
+
+3. In the post-login layout (**src/app/(app)/_layout.tsx**), import the refresh function and `AppState`:
+
+```tsx
+import { AppState } from "react-native"
+import { updateEpisodesWidget } from "../../widgets/widget-refresher"
+```
+
+grab `episodeStore` from `useStores()`:
+
+```diff
+const {
+    authenticationStore: { isAuthenticated },
++    episodeStore,
+  } = useStores()
+```
+
+and add a listener to refresh the widget on resume from background:
+
+```tsx
+React.useEffect(() => {
+  const subscription = AppState.addEventListener("change", (appState) => {
+    if (appState === "active") {
+      updateEpisodesWidget(episodeStore.favorites.slice())
+    }
+  })
+
+  return () => {
+    subscription.remove()
+  }
+}, [])
+```
+
+🏃**Try it (if you want to).** It shouldn't break anything, but it also shouldn't do anything yet.
+
+## Exercise 3(a) and 3(i): Choose-your-own-widget-adventure
+
+We're going to make the widgets do something useful- showing the favorite episodes of the podcast, updating the widget each time a podcast's favorite status is changed. We'll make each widget slightly different, based on the capabilities offered by the OS:
+- **Android**: scroll through a list of favorite podcasts. Tapping a podcast will deep link you to that podcast.
+- **iOS**: show the latest favorite podcast and a badge indicating how many other podcasts are favorited. Implement different styles for the small and medium widget form factors. Deep link to the latest podcast on tap.
+
+At this point, you can decide which widget you'd like to work on first. Use the links below to navigate to the remaining instructions for each widget. Once you're done with one, come back for the other:
+- [Android favorite podcasts widget instructions](/companions/05/05a-android-podcast-widget.md)
+- [iOS favorite podcasts widget instructions](/companions/05/05i-ios-podcast-widget.md)
 
 ## Side Quests
 
