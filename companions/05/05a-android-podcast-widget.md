@@ -167,7 +167,7 @@ export const updateEpisodesWidget = (episodes: Episode[]) => {
 
 Let's style the repeating list of make it look like nice, with a thumbnail, spacing, and perhaps some segmentation of the rows.
 
-[<img src="./assets/05/android-widget.png" width="250" />](./assets/05/android-widget.png)
+[<img src="../../assets/05/android-widget.png" width="250" />](../../assets/05/android-widget.png)
 
 1. In **FavoriteEpisodeWidget.tsx**, swap out the simple `TextWidget` inside the `episodes.map()` expression for a styled row:
 
