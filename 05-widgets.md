@@ -306,6 +306,10 @@ At this point, you can decide which widget you'd like to work on first. Use the 
 - [Android favorite podcasts widget instructions](/companions/05/05a-android-podcast-widget.md)
 - [iOS favorite podcasts widget instructions](/companions/05/05i-ios-podcast-widget.md)
 
+[<img src="./assets/05/android-widget.png" width="250" />](./assets/05/android-widget.png)
+
+[<img src="./assets/05/ios-widget.png" width="250" />](./assets/05/ios-widget.png)
+
 ## Side Quests
 
 - Add any extra stuff to do here

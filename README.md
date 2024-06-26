@@ -18,17 +18,14 @@ Workshop exercises for the Chain React 2024 Intermediate Workshop.
   - Android Studio
   - iOS simulator
   - Android emulator
-  - [Fastlane](https://docs.fastlane.tools/getting-started/ios/setup/) - a small part of the workshop will use [EAS local builds](https://docs.expo.dev/build-reference/local-builds/), though it if you cannot get this working, it will not prevent you from doing the rest of the workshop.
   - If you're not sure if you have all of these or if you have the right versions, check the [Expo Local App Development requirements](https://docs.expo.dev/guides/local-app-development/) for details on how to install these tools in order to enable local native development with the Expo CLI.
 - Other general development tools:
   - Node 18.
   - Visual Studio Code
   - Git (Github Desktop works great)
 - Hardware:
-  - A Mac is highly recommended for the full experience (though all exercises have an Android-only track, so it's possible to do most of the exercises without a Mac).
-- Online accounts:
-  - An Expo account (go to https://expo.dev to sign up)
-  - A Github account
+  - A Mac is highly recommended for the full experience.
+    - The afternoon modules will have iOS-specific exercises. If a Mac isn't available to you, at least make sure your Android native setup is good. We may be able to help you make it through parts of the iOS exercises with EAS Build, provided you have an iOS device and paid Apple developer account.
 - Yarn
 
 ## Test your setup before the workshop
