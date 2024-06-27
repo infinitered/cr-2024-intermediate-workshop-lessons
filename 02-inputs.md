@@ -39,6 +39,12 @@ Maybe we could still save/persist the data instantly in MST, but the Submit butt
 
 ## Exercise 1: Basic keyboard avoidance with `react-native-keyboard-controller`
 
+- Update screen with scrolling to have KeyboardAvoidingScrollview instead of basic ScrollView
+- Add KeyboardProvider wrapped around Slot in App
+- Add some padding to the keyboard offset to have full view of the text field
+- Weird extra padding at the bottom because of both KeyboardAvoidingView and KeyboardAwareScrollView https://github.com/kirillzyusko/react-native-keyboard-controller/issues/451 so only add it on scroll screens
+- Weird behavior on android forcing screen up because of the "height" setting so set to undefined and rebuild
+
 ## Exercise 2: Smooth transitions between fields from the keyboard
 
 ## Exercise 3: New dropdown component
