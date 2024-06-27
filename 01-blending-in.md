@@ -1,4 +1,4 @@
-# Module 01:  Blending in with the surroundings: dynamic text, dark mode, and more
+# Module 01: Blending in with the surroundings: dynamic text, dark mode, and more
 
 ### Goal
 

@@ -152,6 +152,13 @@ renderRootComponent(App);
 registerWidgetTaskHandler(widgetTaskHandler);
 ```
 
+Update your main in **package.json** accordingly:
+
+```diff
+- "main": "expo-router/entry",
++ "main": "src/main.tsx",
+```
+
 6. Update **package.json** to use the new entry point:
 
 ```diff

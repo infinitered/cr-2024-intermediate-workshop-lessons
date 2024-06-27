@@ -1,4 +1,4 @@
-# Module 04: Intro to Expo Modules, Config Plugins, and Native Fingerprint
+# Module 04: “I was just resting my thumb!” - quick homescreen interactivity with Quick Actions
 
 ### Goal
 
