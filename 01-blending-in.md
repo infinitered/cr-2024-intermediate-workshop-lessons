@@ -18,15 +18,26 @@ Let's make our app feel more cohesive with the operating system by respecting th
 
 ### Resources
 
-- Add any helpful links here
+- React Native docs
+  - [allowFontScaling](https://reactnative.dev/docs/text#allowfontscaling)
+  - [maxFontSizeMultiplier](https://reactnative.dev/docs/text#maxfontsizemultiplier)
+  - [useWindowDimensions().fontScale](https://reactnative.dev/docs/usewindowdimensions#fontscale)
+- [Kadi Kraman's video on _Enhancing your React Native App with Haptics, Sounds and Micro-Animations_](https://www.youtube.com/watch?v=hDGASxkKEXE)
+- [Mark Rickert's PR to Ignite for Themeing and Documentation](https://github.com/infinitered/ignite/pull/2636)
 
 # Exercises
 
 ## Exercise 0: Drop in some dark mode compatible assets
 
-TODO: should we put this in the template ahead of time? Use `files/01` dir
+We'll need some dark mode assets later in this lesson. Copy the `sad-face-dark*.png` files from `files/01` into the project's `assets\images` directory
 
 ## Exercise 1: Font scaling that looks good!
+
+One of the greatest benefits to using React Native (and even more so with Expo) is the velocity we can achieve during development. The product team asks, you whip it up and deliver. It works among the team of 5 doing wonders for your next start up.
+
+You'll hand it to the first group of outsiders and potentially will receive some feedback about some button unable to be pressed or some text being unreadable.
+
+Let's explore an aspect of font scaling to help alleviate these pains.
 
 ### Device settings prep
 
