@@ -42,14 +42,8 @@ Let's explore an aspect of font scaling to help alleviate these pains.
 ### Device settings prep
 
 Turn on larger text sizes
-iOS Simulator:
 
-1. Settings app
-2. Display & Text Size
-3. Larger Text
-4. Drag slider all the way to the larger letter `A`
-
-iOS device:
+iOS:
 
 1. Settings app
 2. Accessibility
@@ -57,19 +51,20 @@ iOS device:
 4. Larger Text
 5. Drag slider all the way to the larger letter `A`
 
-Android emulator:
+Android:
 
-1. TODO
-
-Android device:
-
-1. TODO
+1. Settings app
+2. Display (or Display Size and Text)
+3. Font Size
+4. Drag slider to the largest setting
 
 ### Observe the Sign In screen
 
-TODO flesh out text: Notice how we now have to scroll for the button, etc. We know that the heading and subheading are already large from our style implementation. We can choose to not scale the font on these text components so that the screen has a better UX.
+Notice how we now have to scroll for the sign in button. It's not the worst thing, but it's an example of how to proceed may not be apparent to the user.
 
-`src/app/log-in.tsx`
+We know that the heading and subheading are already large from our style implementation. We can choose to not scale the font on these text components so the screen has a better UX.
+
+`src/app/sign-in.tsx`
 
 ```
 <Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$signIn} />
@@ -79,6 +74,30 @@ TODO flesh out text: Notice how we now have to scroll for the button, etc. We kn
 With these changes, the input labels, inputs and button text are all larger - aiding the user in reading the text. The heading and subheading are still large by design and now everything fits on one screen, so they'll know to click the sign in button.
 
 ## Exercise 2: Bzzzt! Adding haptics
+
+Often you'll build an experience and it functions great. Sometimes though, it can feel a little flat. Haptics is a great way to add an extra dimension pretty easily, giving the user some physical feedback as they experience your application.
+
+First, let's provide some feedback if the user submits incorrect credentials. For the ease of testing this, from `login` route, backspace until you have an invalid email address format (e.g., leave off the domain) and submit the form.
+
+You'll notice the only feedback is the helper text in red. Let's iterate on that feedback to enhance it with haptic feedback.
+
+`src/app/log-in.tsx`
+
+```diff
++ import * as Haptics from 'expo-haptics'
+
+// ...
+
+// inside function login() {
+if (validationError) {
++  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+  return
+}
+```
+
+Pretty simple stuff, but now you'll get a nice buzz when the form bounces back with an issue.
+
+Another example of where we could add this feedback is on certain controls, such as the Slider found at the `/profile` route. Add some feedback when the user drags the slider to each value:
 
 `src/app/(app)/(tabs)/profile.tsx`
 
@@ -94,16 +113,7 @@ onValueChange={(value) => {
 }}
 ```
 
-`src/app/log-in.tsx`
-
-```diff
-
-// inside function login() {
-if (validationError) {
-+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-  return
-}
-```
+Feel the difference?
 
 ## Exercise 3: Start building our themeable component library
 
