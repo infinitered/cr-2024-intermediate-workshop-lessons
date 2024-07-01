@@ -47,6 +47,9 @@ Maybe we could still save/persist the data instantly in MST, but the Submit butt
 
 ## Exercise 2: Smooth transitions between fields from the keyboard
 
+- Add KeyboardToolbar from react-native-keyboard-controller to ScreenWithScrolling at the bottom
+- Verify that it works as expected on the profile screen
+
 ## Exercise 3: New dropdown component
 
 ## Exercise 4: Full text search in the dropdown
