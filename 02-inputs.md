@@ -52,6 +52,12 @@ Maybe we could still save/persist the data instantly in MST, but the Submit butt
 
 ## Exercise 3: New dropdown component
 
+- Build select field.
+- Replace text field for skills with select field
+- Add onPress to set the values
+- Add observer around component so the bottom sheet has access to store updates
+- update it to show number of skills selected instead of listing them with renderValue
+
 ## Exercise 4: Full text search in the dropdown
 
 ## Side Quests
