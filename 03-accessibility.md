@@ -13,7 +13,7 @@ How much of our developer profile form can we make accessible before lunch?
 
 ### Features to build
 
-- Make the developer profile tab accessible, facilitatng smoothly navigating through the input fields using voice feedback.
+- Make the developer profile tab as accessible as possible, facilitatng smoothly navigating through the input fields using voice narration.
 
 ### Resources
 
@@ -23,6 +23,12 @@ How much of our developer profile form can we make accessible before lunch?
   - [Accessibily Inspector](https://developer.apple.com/documentation/accessibility/accessibility-inspector)
 - Android
   - ???
+
+# Philosophy
+
+This lesson is a little different from the others. We have some suggested code in here, and suggested areas you should cover when considering the accessibility of the form, but each platform has different capabilities, and there's general guidelines and recommendations and best practices for accessibility, but the operation requires some nuance. You are _describing_ for form; some people may describe it a bit differently. We provide ideas in the form of code snippets, but feel free to customize them as you experience the accessiblity of the form itself. If you find a better option, we would love to talk about it as a group.
+
+We will also be using primarily standard React Native component accessibilty props. There are libraries that can help streamline building accessibility into your UI design process that may be a better fit for your project. But, it's also important to learn what's under the hood, what are the core capabilities that mobile developers lean on.
 
 # Exercises
 
@@ -66,9 +72,86 @@ Whatever tool you use, since we're focusing on making the Profile tab more acces
 
 🏃**Try it.** Cycle through the controls on the Profile tab. How would it feel to use this if you depended on the accessibility tools?
 
-## Exercise 1: Text inputs
+## Exercise 1: Text and text inputs
+
+You may have noticed that the narration from the screen reader sounds like a bunch of random words: "Profile, Name Name, Years of Experience, Years of Experience", etc. It doesn't tell you what the fields are, or even the purpose of the form, or even if it is a form.
+
+### Describe this thing like a normal person, please?
+
+First things, first - what are we even focused on. Let's use simple `accessiblityLabel` props to describe the "Profile" a bit better. Even if we don't do anything else, at least someone could understand that this is an entry form, that it is a place for you to enter information about you, the developer.
+
+#### Try these, or something like it:
+- Add an `accessibilityLabel` to the `Text` component displaying the "Profile" heading, like:
+```tsx
+<Text preset="heading" tx="demoProfileScreen.title" style={$title} accessibilityLabel="Developer profile, entry form" />
+```
+- Consider if it's even clear what a "Profile" is to someone who doesn't need voice narration. Considering context and if it needs to be spelled out can be good for everyone, depending on the situation, you could add a subheading describing the form under the heading, like:
+```tsx
+<Text preset="heading" text="Enter your developer profile to let us know what you'd like to work on and what React Native Radio episodes you'd like to hear" />
+```
+
+### Text Inputs that describe themselves as such
+
+What is a "Name Name"? Clearly, this description will not do.
+
+1. Try adding an `accessibilityLabel` to the name `TextField` to see what happens. Does anything change?
+
+`TextField` isn't a stock React Native component. It does pass additional props to the underlying `TextInput`, but that alone will not have the effect you're looking for. So, let's crack open `TextField` and see how we can modify it to describe itself well.
+
+First off, the whole thing is wrapped by a `TouchableOpacity`. This is actually why it already sounds a little better than it would if it was just a separate `Text` and `TextInput`. By default, buttons have `accessible` set to true, [which means they behave as a container that should treat the child components as a single component for the purposes of accessibility](https://reactnative.dev/docs/accessibility#accessible).
+
+But, the `Text` and `TextInput` controls are announcing their contents and their placeholders, respectively. Hence, "Name Name". One simple way to get it to stop repeating itself is to get rid of one of these.
+
+2. In `TextField`, the `Text` component is optional, so let's stop it from announcing itself by giving it a blank label:
+```diff
+<Text
++  accessibilityLabel=""
+  importantForAccessibility="no-hide-descendants"
+  preset="formLabel"
+  text={label}
+  tx={labelTx}
+```
+
+🏃**Try it.** Less repetitive, huh?
+
+3. It's still difficult to understand what is "Name", though. Here's an idea. Add an explicit `accessibilityLabel` prop to the type definition for `TextField`. Update the `TextInput` inside to use the `accessiblityLabel` if its available, and fall back to displayed label if it's not:
+
+```diff
+<TextInput
++  accessibilityLabel={`${accessibilityLabel || (labelTx ? translate(labelTx!, labelTxOptions) + ", text input" : "") }`}
+  ref={input}
+```
+
+> You'll also need to import `translate` from `src/i18n`. This will turn those i18n labels into the text that needs to be read by the narrator.
+
+🏃**Try it.** Back in the Profile tab, just leave off any accessiblity labels from the `TextField`'s. See how it sounds.
+
+5. Now, where we think more context is needed, let's add `accessiblityLabel` to selected `TextField`'s. For instance, on years of experience, you could do this:
+
+```diff
+<TextField
++ accessibilityLabel="Years of experience, text input, numeric value"
+  labelTx="demoProfileScreen.yoe"
+  containerStyle={$textField}
+  keyboardType="number-pad"
+  placeholderTx="demoProfileScreen.yoe"
+
+6. You might have noticed that Bio still doesn't sound very good. Generally screen readers ignore the placeholder text, but it doesn't seem to be in the case of a multi-line text input. [Apparently placeholders aren't great for accessilbity, anyway](https://www.w3.org/WAI/tutorials/forms/instructions/#placeholder-text). Let's just get rid of it:
+
+```diff
+<TextField
++  accessibilityLabel="Bio, text input, multi-line"
+  labelTx="demoProfileScreen.bio"
+  containerStyle={$textField}
+  multiline
+-  placeholderTx="demoProfileScreen.bio"
+  value={bio}
+  onChangeText={(text) => setProp("bio", text)}
+```
 
 ### Extra Android features
+
+// TODO: Adapt `TextField` to implement `accessibilityLabelledBy`.
 
 ## Exercise 2: Toggles and sliders
 
