@@ -23,7 +23,7 @@ Let's make our app feel more cohesive with the operating system by respecting th
   - [maxFontSizeMultiplier](https://reactnative.dev/docs/text#maxfontsizemultiplier)
   - [useWindowDimensions().fontScale](https://reactnative.dev/docs/usewindowdimensions#fontscale)
 - [Kadi Kraman's video on _Enhancing your React Native App with Haptics, Sounds and Micro-Animations_](https://www.youtube.com/watch?v=hDGASxkKEXE)
-- [Mark Rickert's PR to Ignite for Themeing and Documentation](https://github.com/infinitered/ignite/pull/2636)
+- [Mark Rickert's PR to Ignite for Theming and Documentation](https://github.com/infinitered/ignite/pull/2636)
 
 # Exercises
 
@@ -58,16 +58,16 @@ Android:
 3. Font Size
 4. Drag slider to the largest setting
 
-### Observe the Sign In screen
+### Fix the Log In screen
 
 Notice how we now have to scroll for the sign in button. It's not the worst thing, but it's an example of how to proceed may not be apparent to the user.
 
 We know that the heading and subheading are already large from our style implementation. We can choose to not scale the font on these text components so the screen has a better UX.
 
-`src/app/sign-in.tsx`
+`src/app/log-in.tsx`
 
 ```
-<Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$signIn} />
+<Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$logIn} />
 <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} />
 ```
 
@@ -117,9 +117,13 @@ Feel the difference?
 
 ## Exercise 3: Start building our themeable component library
 
+Adding dark mode to your application has its benefits - reduced eye strain, improved readability, increased accessibility for users with light sensitivity. Who wouldn't want to give their users the opportunity to use that in their application?
+
+Let's build out a theming system in the application, which can be used not only for dark mode but your own custom themes if desired (think seasonal themes with custom color palettes for example).
+
 ### Color Palette
 
-New file `src/theme/colorsDark.ts` (or come up with your own color scheme!)
+Create `src/theme/colorsDark.ts` with the following values (or come up with your own color scheme!):
 
 ```tsx
 const palette = {
@@ -176,7 +180,7 @@ export const colors = {
 
 #### Theme Types and Helpers
 
-Update `src/theme/index.ts`
+Update `src/theme/index.ts` to support both light and dark theme configurations and some helper functions to use later in our styling implementation:
 
 ```tsx
 import type { StyleProp } from "react-native";
@@ -260,11 +264,17 @@ export {
 export { customFontsToLoad } from "./typography";
 ```
 
-Note the export here for `colorsLight` and `spacingLight`
+Note the export here for `colorsLight` and `spacingLight`. We're exporting them as the original `colors` and `spacing` so that the app doesn't just red box everywhere (since they're currently in use, remember we're applying this to an existing application).
+
+Exporting like this will allow for us to continue using our application even if we haven't finished theming all of the components and routes yet. We can gradually make the changes over time, which is a nicer developer experience.
 
 ### `useAppTheme`
 
+Next we'll create the context provider which will give the application access to the current theme information. We'll also create a hook to consume in your components and screens to help create the dynamic styles.
+
 #### ThemeContext
+
+Create `src/utils/useAppTheme.ts` and start with the context:
 
 ```tsx
 import {
@@ -323,6 +333,8 @@ export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
 ```
 
 #### The Hook
+
+In the same file, `src/utils/useAppTheme.ts`, add the hook:
 
 ```tsx
 interface UseAppThemeValue {
@@ -397,7 +409,11 @@ export const useAppTheme = (): UseAppThemeValue => {
 };
 ```
 
+We're now ready to apply the theme to our existing components and screens!
+
 #### Applying the Theme
+
+First, wrap the app in the Theme Provider we just created inside `src/app/(app)/_layout.tsx`:
 
 ```diff
 import { useStores } from "src/models"
@@ -442,7 +458,9 @@ export default observer(function Layout() {
 
 #### Update the component library
 
-For the Podcast index screen, we'll need Button, Card, EmptyState, Screen, Text and Toggle to be themeable.
+Next we'll want to update our component library to utilize the theming values in our styles. For this lesson, we're going to enhance the Podcast index screen to support our dark mode.
+
+To do so, we'll need Button, Card, EmptyState, Screen, Text and Toggle to be themeable. Below is the code for each of the completed components. Go for it without peeking 🙈 or walk through the code to spot the differences yourself and understand where the changes are being made.
 
 <details>
   <summary>src/components/Button.tsx</summary>
@@ -2739,7 +2757,7 @@ const $labelLeft: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 #### Finally, update the Podcasts route
 
-`src/app/(app)/(tabs)/podcasts/index.tsx`
+Update the Podcasts screen for dynamic theming in `src/app/(app)/(tabs)/podcasts/index.tsx`:
 
 ```diff
 import { observer } from "mobx-react-lite"
@@ -3125,7 +3143,9 @@ const $emptyStateImage: ImageStyle = {
 
 ## Side Quests
 
-- Add any extra stuff to do here
+- Update the rest of the components
+- Support dark mode for any of the other screens
+- Create a third theme with your own color palette
 
 ## See the solution
 
