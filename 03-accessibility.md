@@ -151,14 +151,83 @@ But, the `Text` and `TextInput` controls are announcing their contents and their
 
 ### Extra Android features
 
-// TODO: Adapt `TextField` to implement `accessibilityLabelledBy`.
+// TODO: Adapt `TextField` to implement `accessibilityLabelledBy` for Android.
+// NOTE: I haven't tried this implementation on Android yet, it might not be bad.
 
 ## Exercise 2: Toggles and sliders
 
+### Toggles: not terrible?
+
+1. You might notice the narration report the value as 0 or 1. `accessibilityRole`  can help here. Set it and it should start reporting the value as a yes/no:
+
+```diff
+<Toggle
+  labelTx="demoProfileScreen.job"
+  variant="switch"
++  accessibilityRole="togglebutton"
+  labelPosition="left"
+  containerStyle={$textField}
+  value={openToWork}
+```
+
+This works great for the looking for a job and remote only toggles. But what about dark mode? That's more of an "on/off".
+
+Let's implement `accessibilityValue` to override the description of the value:
+
+// TODO: try this for real once this toggle is in place, and then actually test it
+
+```diff
+<Toggle
+  labelTx="demoProfileScreen.job"
+  variant="switch"
++  accessibilityRole="togglebutton"
++ accessibilityValue={{ text: darkMode ? "On" : "Off"}}
+  labelPosition="left"
+  containerStyle={$textField}
+  value={openToWork}
+```
+
+### Sliders: do their own thing
+
+Before we get to the slider itself, we need to deal with how the slider should be one focusable element for accessibility purposes, but it's three different components right now, and you hear all of them.
+
+1. Wrap the two `Text` components and the `Slider` component in a `View` with the `accessible` prop:
+
+```tsx
+<View accessible>
+  { /* contents of slider + labels */ }
+</View>
+```
+
+🏃**Try it.** The actual description of the element doesn't sound great, but at least it's focused as a single element for accessibility.
+
+2. Add `accessibilityLabel=""` as a prop to each of the `Text` components, so the only component that is providing any accessibility info is the `Slider` itself.
+
+3. Give the `Slider` an `accessibilityLabel`:
+
+```diff
+<Slider
++  accessibilityLabel="React Native Familiarity level, slider"
+```
+
+4. `Slider` implements its own accessibility props. It can describe what units the slider users, and it can describe each increment with a text value. Add these props to `Slider`:
+
+```tsx
+accessibilityIncrements={[0, 1, 2, 3, 4].map((i) => translate(`demoProfileScreen.familiaritySubtitles.${i}` as TxKeyPath))}
+accessibilityUnits="level"
+```
+
+🏃**Try it.** With the Accessibilty Inspector, you'll need to change the value, leave the control, and then return, to really hear what's going on. This is a great one to try on a device if you have time. On a device, it'll update each time the slider is moved.
+
 ## Exercise 3: That modal picker thing!
+
+// TODO: need some help, haha
 
 ## Exercise 4: Buttons and validation
 
+// TODO, let's make at least one field provide validation, and let's have it make sense with accessiblity
+// The button should be enabled at all times, and report the issues when submit is pressed but one of the required values isn't set
+// We can also work on proper communication of required values (e.g., say they're required)
 
 ## Side Quests
 
