@@ -332,6 +332,8 @@ export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
 };
 ```
 
+This Context Provider will keep track of the theme in use. It defaults to `overrideTheme` which can be passed into the hook optionally, followed by the user's preference on the OS (obtained by the `useColorScheme` hook from `react-native`) and finally just defaults to light.
+
 #### The Hook
 
 In the same file, `src/utils/useAppTheme.ts`, add the hook:
@@ -425,11 +427,12 @@ import { useFonts } from "expo-font"
 export default observer(function Layout() {
   const {
     authenticationStore: { isAuthenticated },
++   profileStore: { profile: { darkMode } }
   } = useStores()
 +  const {
 +    theme: { colors },
 +  } = useAppTheme()
-+  const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider()
++  const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider(darkMode ? "dark" : "light)
 
   const [fontsLoaded, fontError] = useFonts(customFontsToLoad)
 
@@ -455,6 +458,57 @@ export default observer(function Layout() {
   )
 })
 ```
+
+This will make the theme value available to the entire application. Something to note here, we pass in the preference from the `profileStore` into `useThemeProvider`. This will allow us to retrieve the persisted value during app reloads (or in the real world, when the app gets killed, phone is restarted, etc).
+
+#### Toggling the theme at runtime
+
+We'll enable the switching between light and dark theme on the `profile` route. This will allow us to toggle the theme at runtime and we can see our dark theming in action as we begin to style our components, followed by the `podcast` screen.
+
+Update `src/app/(app)/(tabs)/profile.tsx`:
+
+1. Call the `useAppTheme` hook
+
+```diff
+//...
++import { useAppTheme } from "src/utils/useAppTheme"
+// ...
+
+export default observer(function ProfileScreen() {
+  const {
+    profileStore: { profile },
+    authenticationStore: { logout },
+  } = useStores()
++ const { setThemeContextOverride, themeContext } = useAppTheme()
+```
+
+2. Define a callback function to toggle the theme before the returned JSX.
+
+```tsx
+const toggleTheme = React.useCallback(() => {
+  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // Animate the transition
+  setThemeContextOverride(themeContext === "dark" ? "light" : "dark");
+}, [themeContext, setThemeContextOverride]);
+```
+
+3. Fire the callback in the `onPress` of the `<Toggle />`
+
+````diff
+<Toggle
+  labelTx="demoProfileScreen.darkMode"
+  variant="switch"
+  labelPosition="left"
+  containerStyle={$textField}
+- value={darkMode}
+- onPress={() => setProp("darkMode", !darkMode)}
++ value={themeContext === "dark"}
++  onPress={() => {
++   setProp("darkMode", !darkMode)
++   toggleTheme()
++ }}
+/>
+
+Now the theme value is being updated when the user switches their selection. It is also persisted to the MST store, so we can initialize the proper value when the app is restarted.
 
 #### Update the component library
 
@@ -727,9 +781,13 @@ const $pressedTextPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
   filled: () => ({ opacity: 0.9 }),
   reversed: () => ({ opacity: 0.9 }),
 };
-```
+````
 
 </details>
+
+Now that you've styled the `<Button />` component, toggle the theme back and forth from the `profile` route. Observe the button text changes from dark to light and the background from light to dark.
+
+You're on your way now! Complete the rest of the necessary components for the `podcast` screen. You'll see that as you tackle these components, the rest of the app will begin changing as an added bonus!
 
 <details>
   <summary>src/components/Card.tsx</summary>
