@@ -45,7 +45,7 @@ Let's start by ensuring we can always see our input fields on the profile screen
 
 ### Add Keyboard Provider
 
-We'll start by wrapping our app with KeyboardProvider in the root layout.
+We'll start by wrapping our app with KeyboardProvider in the entry file.
 
 Do the following in **src/app/\_layout.tsx**:
 
@@ -226,8 +226,233 @@ And there you have it, keyboard avoidance and moving from field to field without
 
 ## Exercise 3: New dropdown component
 
-- Build select field.
-- Replace text field for skills with select field
+For the next exercise we're going to switch gears and improve one of our form fields. The skills input is lacking, especially if you enter more than a couple. A comma separated list just isn't the right type for this data.
+
+Instead, let's consider a select field, with a predefined list of skills that a user can select from. We don't have this component yet so lets build it and then update our stores to hold the data as we expect.
+
+### Build Select Field
+
+> The Ignite Cookbook by Infinite Red has a great recipe for building this component so we're going to leverage parts of that and incorporate it into our app! [Check it out here.](https://ignitecookbook.com/docs/recipes/SelectFieldWithBottomSheet)
+
+1. Create the `SelectField.tsx` component file.
+
+Instead of extending the TextField component with more props and functionality, we'll be creating a wrapper for the TextField component that contains additional functionality.
+
+We'll start by creating a new file in the components directory.
+
+```bash
+touch ./src/components/SelectField.tsx
+```
+
+Let's add some preliminary code to the file. Since the TextInput has its own touch handlers for focus, we'll want to disable that by wrapping it in a View with no pointer-events. The new TouchableOpacity will trigger our options sheet.
+
+```tsx
+import React, { forwardRef, Ref, useImperativeHandle } from "react";
+import { View, TouchableOpacity } from "react-native";
+import { TextField, TextFieldProps } from "./TextField";
+
+export interface SelectFieldProps
+  extends Omit<
+    TextFieldProps,
+    "ref" | "onValueChange" | "onChange" | "value"
+  > {}
+export interface SelectFieldRef {}
+
+export const SelectField = forwardRef(function SelectField(
+  props: SelectFieldProps,
+  ref: Ref<SelectFieldRef>
+) {
+  const { ...TextFieldProps } = props;
+
+  const disabled =
+    TextFieldProps.editable === false || TextFieldProps.status === "disabled";
+
+  useImperativeHandle(ref, () => ({}));
+
+  return (
+    <>
+      <TouchableOpacity activeOpacity={1}>
+        <View pointerEvents="none">
+          <TextField {...TextFieldProps} />
+        </View>
+      </TouchableOpacity>
+    </>
+  );
+});
+```
+
+2. Add New Props and Customize the TextField
+
+Now, we can start modifying the code we added in the previous step to support multiple options as well as making the TextField look like a SelectField.
+
+#### Add a Caret Icon Accessory
+
+Let's add an accessory to the input to make it look like a SelectField.
+
+```tsx
+<TextField
+  {...TextFieldProps}
+  RightAccessory={(props) => (
+    <Icon icon="caretRight" containerStyle={props.style} />
+  )}
+/>
+```
+
+#### Add props
+
+- The options prop can be any structure that you want (e.g. flat array of values, object where the key is the option value and the value is the label, etc). For our SelectField guide, we'll be doing an array of objects.
+
+- We will support multi-select (by default) as well as a single select.
+
+- We will override the value prop.
+
+- A new renderValue prop can be used to format and display a custom text value. This can be useful when the TextField is not multiline, but your SelectField is.
+
+- Additionally, we'll add a new event callback called onSelect since that makes more sense for a SelectField. However, feel free to override TextField's onChange if you prefer.
+
+```tsx
+export interface SelectFieldProps
+  extends Omit<TextFieldProps, "ref" | "onValueChange" | "onChange"> {
+  value?: string[];
+  renderValue?: (value: string[]) => string;
+  onSelect?: (newValue: string[]) => void;
+  multiple?: boolean;
+  options: { label: string; value: string }[];
+}
+
+// ...
+
+const {
+  value = [],
+  renderValue,
+  onSelect,
+  options = [],
+  multiple = true,
+  ...TextFieldProps
+} = props;
+```
+
+#### Add Logic to Display Selected Options
+
+We'll add some code to display the selected options inside the TextField. This will attempt to use the renderValue formatter function and fallback to a joined string.
+
+```tsx
+const valueString =
+  renderValue?.(value) ??
+  value
+    .map((v) => options.find((o) => o.value === v)?.label)
+    .filter(Boolean)
+    .join(", ");
+```
+
+### Replace SelectField for Skills TextField
+
+Now that we've got the SelectField (ie.our souped up TextField) let's replace the existing skills field on the Profile screen.
+
+In _src/app/(app)/(tabs)/profile.tsx:_
+
+- Add a SelectField right below the existing skills TextField.
+- Copy over the labelTx to the corresponding SelectField prop
+- We need some data, copy the following into a constant at the top of the file.
+
+<details><summary>Skills List</summary>
+
+```tsx
+const skillsList: {
+  label: string;
+  value: string;
+}[] = [
+  { label: "JavaScript", value: "javascript" },
+  { label: "React Native", value: "react_native" },
+  { label: "Redux", value: "redux" },
+  { label: "TypeScript", value: "typescript" },
+  { label: "API Integration", value: "api_integration" },
+  { label: "RESTful Services", value: "restful_services" },
+  { label: "GraphQL", value: "graphql" },
+  { label: "Node.js", value: "node_js" },
+  { label: "Firebase", value: "firebase" },
+  { label: "AWS", value: "aws" },
+  { label: "Google Cloud", value: "google_cloud" },
+  { label: "CI/CD", value: "ci_cd" },
+  { label: "Jest", value: "jest" },
+  { label: "Mocha", value: "mocha" },
+  { label: "Enzyme", value: "enzyme" },
+  { label: "Unit Testing", value: "unit_testing" },
+  { label: "Integration Testing", value: "integration_testing" },
+  { label: "UI/UX Design", value: "ui_ux_design" },
+  { label: "Agile Methodologies", value: "agile_methodologies" },
+  { label: "Scrum", value: "scrum" },
+  { label: "React Navigation", value: "react_navigation" },
+  { label: "Expo", value: "expo" },
+  { label: "Expo CLI", value: "expo_cli" },
+  { label: "Expo SDK", value: "expo_sdk" },
+  { label: "Styled Components", value: "styled_components" },
+  { label: "Reanimated", value: "reanimated" },
+  { label: "Native Base", value: "native_base" },
+  { label: "React Native Paper", value: "react_native_paper" },
+  { label: "React Native Elements", value: "react_native_elements" },
+  { label: "React Native Vector Icons", value: "react_native_vector_icons" },
+  { label: "Lottie", value: "lottie" },
+  { label: "React Native Maps", value: "react_native_maps" },
+  { label: "CodePush", value: "codepush" },
+  { label: "Fastlane", value: "fastlane" },
+  { label: "Realm", value: "realm" },
+];
+```
+
+</details>
+<br/>
+
+- Pass our new skillsList in for the options property
+- Add an onSelect prop that takes in `selected` and passes that through the `setProp` action for skills.
+- The value should be set to skills from our Profile model.
+- Remove the old skill TextField and Text label above it.
+
+So far your select field should look like this:
+
+```tsx
+<SelectField
+  options={skillsList}
+  labelTx="demoProfileScreen.skills"
+  onSelect={(selected) => setProp("skills", selected)}
+  value={skills}
+/>
+```
+
+But now our Profile model is out of sync with the data we are providing it. Let's go update that!
+
+In _src/models/Profile.ts_:
+
+- update the `skills` prop to be an optional array of strings
+
+```tsx
+types.optional(types.array(types.string), []);
+```
+
+### Add the Sheet Components
+
+Let's go back to building our SelectField now that we've got it added to our Profile screen and we'll add the functionality to view and select options.
+
+In this step, we'll be adding the BottomSheetModal and related components and setting up the touch-events to show/hide it
+
+#### Add the `BottomSheetModalProvider`
+
+Since we will be using the BottomSheetModal component instead of BottomSheet, we will need to add a provider to your entry file.
+
+We're going to need our keyboard avoiding behavior in a later step, so make sure to add the provider nested within the existing KeyboardProvider.
+
+```tsx
+<KeyboardProvider>
+  <BottomSheetModalProvider>
+    <Slot />
+  </BottomSheetModalProvider>
+</KeyboardProvider>
+```
+
+#### Add the Necessary Components to `SelectField`
+
+Now we will add the UI components that will display our options. This will be a basic example and we'll customize it a bit later.
+
 - Add onPress to set the values
 - Add observer around component so the bottom sheet has access to store updates
 - update it to show number of skills selected instead of listing them with renderValue
