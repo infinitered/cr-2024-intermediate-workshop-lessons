@@ -130,6 +130,8 @@ To fix this, let's head into the `ScreenWithScrolling` component (in the same fi
 </details>
 <br/>
 
+### Pad for extra viewing comfort
+
 We're getting somewhere now, but lets add some padding to offset the bottom of the textfields just a little so we don't have any cutoff.
 
 1. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
@@ -138,7 +140,7 @@ We're getting somewhere now, but lets add some padding to offset the bottom of t
 
 There we go! The keyboard isn't blocking any of our fields.
 
----
+### Fix double padding issue on scroll
 
 Uh oh! Try focusing on one of the text fields and scrolling to the bottom of the screen with the keyboard open. There's so much extra padding at the bottom of the screen when the keyboard is open.
 
@@ -160,17 +162,67 @@ Reuse the `isNonScrolling` function and add an `enable` prop to the KeyboardAvoi
 
 Now let's check it again...and no doubled up padding when the keyboard is open!
 
-<!-- #### Android Only
+#### Android Only
 
-If you're working on an android you might have noticed some weird behavior forcing the screen up when clicking through
+If you're working on an android you might have noticed some weird behavior forcing the screen up when focusing on text inputs. The screen seems to be scrolling too far and focusing the input even though it is off screen.
 
-- Weird behavior on android forcing screen up because of the "height" setting so set to undefined and rebuild -->
+To fix this, in our `Screen` component update the `KeyboarAvoidingView` behavior property to "undefined" if not iOS. This should solve it, but needs a rebuild so make sure to kill your app and re-run `yarn android` to get it behaving correctly!
+
+```diff
+ <KeyboardAvoidingView
+-   behavior={isIos ? "padding" : "height"}
++   behavior={isIos ? "padding" : undefined}
+```
 
 ## Exercise 2: Smooth transitions between fields from the keyboard
 
-- Add KeyboardToolbar from react-native-keyboard-controller to ScreenWithScrolling at the bottom
-- Verify that it works as expected on the profile screen
-- Will overlap some with bio, make sure to add the height of the toolbar
+Not that keyboard avoiding isn't great, but it's quite a pain to have to scroll to see the other text fields. On top of that, if you scroll past, or haven't scrolled enough, a user might not even know there's an input to see!
+
+A toolbar with inputs to navigate between textfields and close the keyboard when we're done is a great native feeling solution.
+
+### Add toolbar to Profile Screen
+
+Since we don't necessarily want a toolbar on every scrolling screen (ie. even the ones without inputs), we can add it directly to our Profile screen.
+
+In _src/app/(app)/(tabs)/profile.tsx_:
+
+1. Wrap the Screen component in a fragment
+2. Import `KeyboardToolbar` from `react-native-keyboard-controller`
+
+```tsx
+import { KeyboardToolbar } from "react-native-keyboard-controller";
+```
+
+3. Add the `KeyboardToolbar` below the `Screen` component within the fragment
+
+```tsx
+<>
+  <Screen>...</Screen>
+  <KeyboardToolbar />
+</>
+```
+
+> Verify that this works as expected, with arrows to move between fields and closing the keyboard with the done button instead of simply pressing outside an input or hitting return on the keyboard.
+
+### Update bottomOffset
+
+Now that we've got the toolbar added, you might notice that there is a slight overlap with the two text fields lower down on our screen. You might be thinking _"But I fixed this earlier when I added the bottom offset to the screen!"_ and you would be right.
+
+Since we added the toolbar outside of the `Screen` component, theIn adding the toolbar, we need to also offset that height as the KeyboardAwareScrollView isn't aware of it since it's outside of the `Screen` component.
+
+- Try inspecting the toolbar and checking the height!
+- You'll find that the toolbar has a height of 42px on both iOS and android so lets add that to our existing `bottomOffset` prop on our profile screen.
+
+```tsx
+<Screen
+        preset="scroll"
+        contentContainerStyle={$container}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={spacing.md + 42} // height of the toolbar + existing padding
+      >
+```
+
+And there you have it, keyboard avoidance and moving from field to field without covering inputs for a form that is much easier to use.
 
 ## Exercise 3: New dropdown component
 
