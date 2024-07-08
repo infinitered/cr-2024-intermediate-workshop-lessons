@@ -29,7 +29,7 @@ Let's make our app feel more cohesive with the operating system by respecting th
 
 ## Exercise 0: Drop in some dark mode compatible assets
 
-We'll need some dark mode assets later in this lesson. Copy the `sad-face-dark*.png` files from `files/01` into the project's `assets\images` directory
+We'll need some dark mode assets later in this lesson. Copy the `sad-face-dark*.png` files from `files/01` into the project's `assets/images` directory
 
 ## Exercise 1: Font scaling that looks good!
 
@@ -67,17 +67,33 @@ We know that the heading and subheading are already large from our style impleme
 `src/app/log-in.tsx`
 
 ```
-<Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$logIn} />
-<Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} />
+<Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$logIn} allowFontScaling={false} />
+<Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} allowFontScaling={false} />
 ```
 
 With these changes, the input labels, inputs and button text are all larger - aiding the user in reading the text. The heading and subheading are still large by design and now everything fits on one screen, so they'll know to click the sign in button.
+
+### Even larger sizes
+
+Sometimes, the user will have larger accessibility sizes (or a zoom) enabled. If you noticed on iOS, you have the ability in the Settings app to unlock some larger text sizes. Change the `Larger Accessibility Sizes` toggle and again drag the slider further to the right.
+
+Flip back to the application and you'll notice the screen has changed again! This time, we'll use the `maxFontSizeMultiplier` prop to the screen under control. Try the following:
+
+1. Apply `maxFontSizeMultiplier` to the `<TextField />` labels via `LabelTextProps={{ maxFontSizeMultiplier: 2 }}`
+
+Still very readable, but notice the text is still not visible in the textfield itself. If you type, it looks as if nothing is being entered into the fields.
+
+2. Apply `maxFontSizeMultiplier` to the `<TextField />` input via `maxFontSizeMultiplier={{ maxFontSizeMultiplier: 2 }}`
+
+Getting better! The button text still feels extremely large, but you're now fully equipped to deal with this issue. Using a value of 2 for the `maxFontSizeMultiplier` prop is just an example, you can come up with a factor based on the device size, dimensions, font scale and so on.
+
+Feel free to restore your device settings before moving on to the next exercise.
 
 ## Exercise 2: Bzzzt! Adding haptics
 
 Often you'll build an experience and it functions great. Sometimes though, it can feel a little flat. Haptics is a great way to add an extra dimension pretty easily, giving the user some physical feedback as they experience your application.
 
-First, let's provide some feedback if the user submits incorrect credentials. For the ease of testing this, from `login` route, backspace until you have an invalid email address format (e.g., leave off the domain) and submit the form.
+First, let's provide some feedback if the user submits incorrect credentials. For the ease of testing this, from `log-in` route, backspace until you have an invalid email address format (e.g., leave off the domain) and submit the form.
 
 You'll notice the only feedback is the helper text in red. Let's iterate on that feedback to enhance it with haptic feedback.
 
@@ -89,10 +105,11 @@ You'll notice the only feedback is the helper text in red. Let's iterate on that
 // ...
 
 // inside function login() {
-if (validationError) {
-+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-  return
-}
+- if (validationError) return
++ if (validationError) {
++   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
++   return
++ }
 ```
 
 Pretty simple stuff, but now you'll get a nice buzz when the form bounces back with an issue.
@@ -107,10 +124,11 @@ Another example of where we could add this feedback is on certain controls, such
 // ...
 
 // find <Slider />
-onValueChange={(value) => {
-+ Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-  setProp("rnFamiliarity", value)
-}}
+- onValueChange={(value) => setProp("rnFamiliarity", value)}
++ onValueChange={(value) => {
++   Haptics.selectionAsync()
++   setProp("rnFamiliarity", value)
++ }}
 ```
 
 Feel the difference?
