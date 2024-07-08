@@ -3081,4 +3081,4 @@ const $emptyStateImage: ImageStyle = {
 
 ## See the solution
 
-Switch to branch: `01-blending-in-solution`
+Switch to branch: [`01-blending-in-solution`](https://github.com/infinitered/cr-2024-intermediate-workshop-template/tree/01-blending-in-solution)
