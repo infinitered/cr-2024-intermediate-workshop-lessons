@@ -33,22 +33,144 @@ Maybe we could still save/persist the data instantly in MST, but the Submit butt
 
 ### Resources
 
-- Add any helpful links here
+- [react-native-keyboard-controller](https://github.com/kirillzyusko/react-native-keyboard-controller)
+- [react-native-bottom-sheet](https://github.com/gorhom/react-native-bottom-sheet)
+- [Ignite Cookbook - Select field with bottom sheet recipe](https://ignitecookbook.com/docs/recipes/SelectFieldWithBottomSheet/)
 
 # Exercises
 
 ## Exercise 1: Basic keyboard avoidance with `react-native-keyboard-controller`
 
-- Update screen with scrolling to have KeyboardAvoidingScrollview instead of basic ScrollView
-- Add KeyboardProvider wrapped around Slot in App
-- Add some padding to the keyboard offset to have full view of the text field
-- Weird extra padding at the bottom because of both KeyboardAvoidingView and KeyboardAwareScrollView https://github.com/kirillzyusko/react-native-keyboard-controller/issues/451 so only add it on scroll screens
-- Weird behavior on android forcing screen up because of the "height" setting so set to undefined and rebuild
+Let's start by ensuring we can always see our input fields on the profile screen, especially when the keyboard is engaged. With the app running, give the profile screen a scroll and try switching between inputs. Is the keyboard in the way? Let's fix that.
+
+### Add Keyboard Provider
+
+We'll start by wrapping our app with KeyboardProvider in the root layout.
+
+Do the following in **src/app/\_layout.tsx**:
+
+1. Import `KeyboardProvider` from `react-native-keyboard-controller`
+
+```tsx
+import { KeyboardProvider } from "react-native-keyboard-controller";
+```
+
+2. Wrap the provider around the `Slot` component
+
+```diff
+return (
++  <KeyboardProvider>
+    <Slot />
++  </KeyboardProvider>
+);
+```
+
+Now let's head to our Screen component and update the existing scrolling screen to use a KeyboardAvoidingScrollview instead of a basic ScrollView.
+
+### Update our Screen component
+
+In **src/components/Screen.tsx**
+
+Notice that we're already using a KeyboardAvoidingView in the main screen component.
+
+```tsx
+export function Screen(props: ScreenProps) {
+  const {
+    backgroundColor = colors.background,
+    KeyboardAvoidingViewProps,
+    keyboardOffset = 0,
+    safeAreaEdges,
+    StatusBarProps,
+    statusBarStyle = "dark",
+  } = props;
+
+  const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges);
+
+  return (
+    <View style={[$containerStyle, { backgroundColor }, $containerInsets]}>
+      <StatusBar style={statusBarStyle} {...StatusBarProps} />
+
+      <KeyboardAvoidingView
+        behavior={isIos ? "padding" : "height"}
+        keyboardVerticalOffset={keyboardOffset}
+        {...KeyboardAvoidingViewProps}
+        style={[$keyboardAvoidingViewStyle, KeyboardAvoidingViewProps?.style]}
+      >
+        {isNonScrolling(props.preset) ? (
+          <ScreenWithoutScrolling {...props} />
+        ) : (
+          <ScreenWithScrolling {...props} />
+        )}
+      </KeyboardAvoidingView>
+    </View>
+  );
+}
+```
+
+> This works great for some views, keeping floating buttons at the bottom of a view when the keyboard is open for example, but has trouble managing on views with scrolling so we need another solution.
+
+<details><summary>Bad Keyboard Avoidance Demo</summary>
+<video width=300 src=./files/02/KeyboardAvoidingViewFail.mp4 />
+</details>
+
+<br/>
+
+To fix this, let's head into the `ScreenWithScrolling` component (in the same file, just up above) and replace the existing `Scrollview` with a `KeyboardAwareScrollView`. We can keep all the existing props, and see how this helps.
+
+```diff
+-    <ScrollView>
++    <KeyboardAwareScrollView>
+...
+-    </ScrollView>
++    </KeyboardAwareScrollView>
+```
+
+<details><summary>Somewhat Better Keyboard Avoidance</summary>
+<video width=300 src=./files/02/KeyboardAwareScrollView1.mp4 />
+</details>
+<br/>
+
+We're getting somewhere now, but lets add some padding to offset the bottom of the textfields just a little so we don't have any cutoff.
+
+1. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
+2. Destructure that prop in our `ScreenWithScrolling` component, preferrably with a default of 0
+3. Pass `bottomOffset` in to the `KeyboardAwareScrollView`
+
+There we go! The keyboard isn't blocking any of our fields.
+
+---
+
+Uh oh! Try focusing on one of the text fields and scrolling to the bottom of the screen with the keyboard open. There's so much extra padding at the bottom of the screen when the keyboard is open.
+
+This is a known issue when nesting `KeyboardAvoidingView` and `KeyboardAwareScrollView` (https://github.com/kirillzyusko/react-native-keyboard-controller/issues/451 )
+
+We don't really need both when we're using the `KeyboardAwareScrollView`, but we definitely want to keep avoiding the keyboard for non-scrolling screens. Let's enable the `KeyboardAvoidingView` only if it's a fixed screen.
+
+Reuse the `isNonScrolling` function and add an `enable` prop to the KeyboardAvoidingView.
+
+```diff
+ <KeyboardAvoidingView
+        behavior={isIos ? "padding" : "height"}
+        keyboardVerticalOffset={keyboardOffset}
+        {...KeyboardAvoidingViewProps}
+        style={[$keyboardAvoidingViewStyle, KeyboardAvoidingViewProps?.style]}
++        enabled={isNonScrolling(props.preset)}
+      >
+```
+
+Now let's check it again...and no doubled up padding when the keyboard is open!
+
+<!-- #### Android Only
+
+If you're working on an android you might have noticed some weird behavior forcing the screen up when clicking through
+
+- Weird behavior on android forcing screen up because of the "height" setting so set to undefined and rebuild -->
 
 ## Exercise 2: Smooth transitions between fields from the keyboard
 
 - Add KeyboardToolbar from react-native-keyboard-controller to ScreenWithScrolling at the bottom
 - Verify that it works as expected on the profile screen
+- Will overlap some with bio, make sure to add the height of the toolbar
 
 ## Exercise 3: New dropdown component
 
