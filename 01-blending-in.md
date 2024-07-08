@@ -196,6 +196,27 @@ export const colors = {
 } as const;
 ```
 
+Also create `src/theme/spacingDark.ts` with the following values (again, feel free to mimic the same values as light mode or come up with your own dark mode spacing values):
+
+```tsx
+/**
+  Use these spacings for margins/paddings and other whitespace throughout your app.
+ */
+export const spacing = {
+  xxxs: 2,
+  xxs: 4,
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+  xxxl: 64,
+} as const;
+
+export type Spacing = keyof typeof spacing;
+```
+
 #### Theme Types and Helpers
 
 Update `src/theme/index.ts` to support both light and dark theme configurations and some helper functions to use later in our styling implementation:
@@ -438,41 +459,26 @@ First, wrap the app in the Theme Provider we just created inside `src/app/(app)/
 ```diff
 import { useStores } from "src/models"
 import { useFonts } from "expo-font"
-- import { colors, customFontsToLoad } from "src/theme"
-+ import { customFontsToLoad } from "src/theme"
-+import { useAppTheme, useThemeProvider } from "src/utils/useAppTheme"
++ import {  useThemeProvider } from "src/utils/useAppTheme"
 
 export default observer(function Layout() {
   const {
     authenticationStore: { isAuthenticated },
 +   profileStore: { profile: { darkMode } }
   } = useStores()
-+  const {
-+    theme: { colors },
-+  } = useAppTheme()
-+  const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider(darkMode ? "dark" : "light)
 
-  const [fontsLoaded, fontError] = useFonts(customFontsToLoad)
-
-  React.useEffect(() => {
-    if (fontsLoaded || fontError) {
-      // Hide the splash screen after the fonts have loaded and the UI is ready.
-      SplashScreen.hideAsync()
-    }
-  }, [fontsLoaded, fontError])
-
-  if (!fontsLoaded && !fontError) {
-    return null
-  }
++ const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider(darkMode ? "dark" : "light")
 
   if (!isAuthenticated) {
     return <Redirect href="/log-in" />
   }
 
-+ return (
-+  <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-      <Stack screenOptions={{ headerShown: false }} />
-+  </ThemeProvider>
+return (
++ <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+    </Stack>
++ </ThemeProvider>
   )
 })
 ```
@@ -489,7 +495,9 @@ Update `src/app/(app)/(tabs)/profile.tsx`:
 
 ```diff
 //...
-+import { useAppTheme } from "src/utils/useAppTheme"
+- import {TextStyle, View, ViewStyle } from "react-native"
++ import { LayoutAnimation, TextStyle, View, ViewStyle } from "react-native"
++ import { useAppTheme } from "src/utils/useAppTheme"
 // ...
 
 export default observer(function ProfileScreen() {
@@ -511,7 +519,7 @@ const toggleTheme = React.useCallback(() => {
 
 3. Fire the callback in the `onPress` of the `<Toggle />`
 
-````diff
+```diff
 <Toggle
   labelTx="demoProfileScreen.darkMode"
   variant="switch"
@@ -525,6 +533,7 @@ const toggleTheme = React.useCallback(() => {
 +   toggleTheme()
 + }}
 />
+```
 
 Now the theme value is being updated when the user switches their selection. It is also persisted to the MST store, so we can initialize the proper value when the app is restarted.
 
@@ -573,6 +582,10 @@ export interface ButtonProps extends PressableProps {
    * as well as explicitly setting locale or translation fallbacks.
    */
   txOptions?: TextProps["txOptions"];
+  /**
+   * Pass any additional props directly to the label Text component.
+   */
+  TextProps?: TextProps;
   /**
    * An optional style override useful for padding & margin.
    */
@@ -651,6 +664,7 @@ export function Button(props: ButtonProps) {
     LeftAccessory,
     disabled,
     disabledStyle: $disabledViewStyleOverride,
+    TextProps,
     ...rest
   } = props;
 
@@ -712,6 +726,7 @@ export function Button(props: ButtonProps) {
             tx={tx}
             text={text}
             txOptions={txOptions}
+            {...TextProps}
             style={$textStyle(state)}
           >
             {children}
@@ -799,7 +814,7 @@ const $pressedTextPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
   filled: () => ({ opacity: 0.9 }),
   reversed: () => ({ opacity: 0.9 }),
 };
-````
+```
 
 </details>
 
@@ -811,7 +826,12 @@ You're on your way now! Complete the rest of the necessary components for the `p
   <summary>src/components/Card.tsx</summary>
 
 ```tsx
-import React, { ComponentType, Fragment, ReactElement } from "react";
+import React, {
+  Fragment,
+  ReactElement,
+  RefAttributes,
+  forwardRef,
+} from "react";
 import {
   StyleProp,
   TextStyle,
@@ -934,6 +954,8 @@ interface CardProps extends TouchableOpacityProps {
   FooterComponent?: ReactElement;
 }
 
+type RefProps = RefAttributes<View>;
+
 /**
  * Cards are useful for displaying related information in a contained way.
  * If a ListItem displays content horizontally, a Card can be used to display content vertically.
@@ -941,7 +963,7 @@ interface CardProps extends TouchableOpacityProps {
  * @param {CardProps} props - The props for the `Card` component.
  * @returns {JSX.Element} The rendered `Card` component.
  */
-export function Card(props: CardProps) {
+export const Card = forwardRef(function Card(props: CardProps, ref) {
   const {
     content,
     contentTx,
@@ -979,9 +1001,15 @@ export function Card(props: CardProps) {
   const isContentPresent = !!(ContentComponent || content || contentTx);
   const isFooterPresent = !!(FooterComponent || footer || footerTx);
 
-  const Wrapper = (isPressable ? TouchableOpacity : View) as ComponentType<
-    TouchableOpacityProps | ViewProps
-  >;
+  const Wrapper = forwardRef<View, typeof WrapperProps & RefProps>(
+    function Wrapper(wrapperProps, innerRef) {
+      const Component = isPressable
+        ? TouchableOpacity
+        : (View as React.ComponentType<TouchableOpacityProps | ViewProps>);
+      return <Component ref={innerRef} {...wrapperProps} />;
+    }
+  );
+
   const HeaderContentWrapper =
     verticalAlignment === "force-footer-bottom" ? View : Fragment;
 
@@ -1017,6 +1045,7 @@ export function Card(props: CardProps) {
 
   return (
     <Wrapper
+      ref={ref}
       style={$containerStyle}
       activeOpacity={0.8}
       accessibilityRole={isPressable ? "button" : undefined}
@@ -1068,7 +1097,7 @@ export function Card(props: CardProps) {
       {RightComponent}
     </Wrapper>
   );
-}
+});
 
 const $containerBase: ThemedStyle<ViewStyle> = (theme) => ({
   borderRadius: theme.spacing.md,
@@ -1713,314 +1742,142 @@ const $innerStyle: ViewStyle = {
   <summary>src/components/Text.tsx</summary>
 
 ```tsx
-import { useScrollToTop } from "@react-navigation/native";
-import { StatusBar, StatusBarProps, StatusBarStyle } from "expo-status-bar";
-import React, { useRef, useState } from "react";
+import i18n from "i18n-js";
+import React from "react";
 import {
-  KeyboardAvoidingView,
-  KeyboardAvoidingViewProps,
-  LayoutChangeEvent,
-  Platform,
-  ScrollView,
-  ScrollViewProps,
   StyleProp,
-  View,
-  ViewStyle,
+  Text as RNText,
+  TextProps as RNTextProps,
+  TextStyle,
 } from "react-native";
-import {
-  ExtendedEdge,
-  useSafeAreaInsetsStyle,
-} from "../utils/useSafeAreaInsetsStyle";
+import { isRTL, translate, TxKeyPath } from "../i18n";
+import type { ThemedStyle, ThemedStyleArray } from "src/theme";
 import { useAppTheme } from "src/utils/useAppTheme";
+import { typography } from "src/theme/typography";
 
-interface BaseScreenProps {
+type Sizes = keyof typeof $sizeStyles;
+type Weights = keyof typeof typography.primary;
+type Presets =
+  | "default"
+  | "bold"
+  | "heading"
+  | "subheading"
+  | "formLabel"
+  | "formHelper";
+
+export interface TextProps extends RNTextProps {
+  /**
+   * Text which is looked up via i18n.
+   */
+  tx?: TxKeyPath;
+  /**
+   * The text to display if not using `tx` or nested components.
+   */
+  text?: string;
+  /**
+   * Optional options to pass to i18n. Useful for interpolation
+   * as well as explicitly setting locale or translation fallbacks.
+   */
+  txOptions?: i18n.TranslateOptions;
+  /**
+   * An optional style override useful for padding & margin.
+   */
+  style?: StyleProp<TextStyle>;
+  /**
+   * One of the different types of text presets.
+   */
+  preset?: Presets;
+  /**
+   * Text weight modifier.
+   */
+  weight?: Weights;
+  /**
+   * Text size modifier.
+   */
+  size?: Sizes;
   /**
    * Children components.
    */
   children?: React.ReactNode;
-  /**
-   * Style for the outer content container useful for padding & margin.
-   */
-  style?: StyleProp<ViewStyle>;
-  /**
-   * Style for the inner content container useful for padding & margin.
-   */
-  contentContainerStyle?: StyleProp<ViewStyle>;
-  /**
-   * Override the default edges for the safe area.
-   */
-  safeAreaEdges?: ExtendedEdge[];
-  /**
-   * Background color
-   */
-  backgroundColor?: string;
-  /**
-   * Status bar setting. Defaults to dark.
-   */
-  statusBarStyle?: StatusBarStyle;
-  /**
-   * By how much should we offset the keyboard? Defaults to 0.
-   */
-  keyboardOffset?: number;
-  /**
-   * Pass any additional props directly to the StatusBar component.
-   */
-  StatusBarProps?: StatusBarProps;
-  /**
-   * Pass any additional props directly to the KeyboardAvoidingView component.
-   */
-  KeyboardAvoidingViewProps?: KeyboardAvoidingViewProps;
-}
-
-interface FixedScreenProps extends BaseScreenProps {
-  preset?: "fixed";
-}
-interface ScrollScreenProps extends BaseScreenProps {
-  preset?: "scroll";
-  /**
-   * Should keyboard persist on screen tap. Defaults to handled.
-   * Only applies to scroll preset.
-   */
-  keyboardShouldPersistTaps?: "handled" | "always" | "never";
-  /**
-   * Pass any additional props directly to the ScrollView component.
-   */
-  ScrollViewProps?: ScrollViewProps;
-}
-
-interface AutoScreenProps extends Omit<ScrollScreenProps, "preset"> {
-  preset?: "auto";
-  /**
-   * Threshold to trigger the automatic disabling/enabling of scroll ability.
-   * Defaults to `{ percent: 0.92 }`.
-   */
-  scrollEnabledToggleThreshold?: { percent?: number; point?: number };
-}
-
-export type ScreenProps =
-  | ScrollScreenProps
-  | FixedScreenProps
-  | AutoScreenProps;
-
-const isIos = Platform.OS === "ios";
-
-type ScreenPreset = "fixed" | "scroll" | "auto";
-
-/**
- * @param {ScreenPreset?} preset - The preset to check.
- * @returns {boolean} - Whether the preset is non-scrolling.
- */
-function isNonScrolling(preset?: ScreenPreset) {
-  return !preset || preset === "fixed";
 }
 
 /**
- * Custom hook that handles the automatic enabling/disabling of scroll ability based on the content size and screen size.
- * @param {UseAutoPresetProps} props - The props for the `useAutoPreset` hook.
- * @returns {{boolean, Function, Function}} - The scroll state, and the `onContentSizeChange` and `onLayout` functions.
+ * For your text displaying needs.
+ * This component is a HOC over the built-in React Native one.
+ * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Text/}
+ * @param {TextProps} props - The props for the `Text` component.
+ * @returns {JSX.Element} The rendered `Text` component.
  */
-function useAutoPreset(props: AutoScreenProps): {
-  scrollEnabled: boolean;
-  onContentSizeChange: (w: number, h: number) => void;
-  onLayout: (e: LayoutChangeEvent) => void;
-} {
-  const { preset, scrollEnabledToggleThreshold } = props;
-  const { percent = 0.92, point = 0 } = scrollEnabledToggleThreshold || {};
-
-  const scrollViewHeight = useRef<null | number>(null);
-  const scrollViewContentHeight = useRef<null | number>(null);
-  const [scrollEnabled, setScrollEnabled] = useState(true);
-
-  function updateScrollState() {
-    if (
-      scrollViewHeight.current === null ||
-      scrollViewContentHeight.current === null
-    )
-      return;
-
-    // check whether content fits the screen then toggle scroll state according to it
-    const contentFitsScreen = (function () {
-      if (point) {
-        return (
-          scrollViewContentHeight.current < scrollViewHeight.current - point
-        );
-      } else {
-        return (
-          scrollViewContentHeight.current < scrollViewHeight.current * percent
-        );
-      }
-    })();
-
-    // content is less than the size of the screen, so we can disable scrolling
-    if (scrollEnabled && contentFitsScreen) setScrollEnabled(false);
-
-    // content is greater than the size of the screen, so let's enable scrolling
-    if (!scrollEnabled && !contentFitsScreen) setScrollEnabled(true);
-  }
-
-  /**
-   * @param {number} w - The width of the content.
-   * @param {number} h - The height of the content.
-   */
-  function onContentSizeChange(w: number, h: number) {
-    // update scroll-view content height
-    scrollViewContentHeight.current = h;
-    updateScrollState();
-  }
-
-  /**
-   * @param {LayoutChangeEvent} e = The layout change event.
-   */
-  function onLayout(e: LayoutChangeEvent) {
-    const { height } = e.nativeEvent.layout;
-    // update scroll-view  height
-    scrollViewHeight.current = height;
-    updateScrollState();
-  }
-
-  // update scroll state on every render
-  if (preset === "auto") updateScrollState();
-
-  return {
-    scrollEnabled: preset === "auto" ? scrollEnabled : true,
-    onContentSizeChange,
-    onLayout,
-  };
-}
-
-/**
- * @param {ScreenProps} props - The props for the `ScreenWithoutScrolling` component.
- * @returns {JSX.Element} - The rendered `ScreenWithoutScrolling` component.
- */
-function ScreenWithoutScrolling(props: ScreenProps) {
-  const { style, contentContainerStyle, children } = props;
-  return (
-    <View style={[$outerStyle, style]}>
-      <View style={[$innerStyle, contentContainerStyle]}>{children}</View>
-    </View>
-  );
-}
-
-/**
- * @param {ScreenProps} props - The props for the `ScreenWithScrolling` component.
- * @returns {JSX.Element} - The rendered `ScreenWithScrolling` component.
- */
-function ScreenWithScrolling(props: ScreenProps) {
+export function Text(props: TextProps) {
   const {
+    weight,
+    size,
+    tx,
+    txOptions,
+    text,
     children,
-    keyboardShouldPersistTaps = "handled",
-    contentContainerStyle,
-    ScrollViewProps,
-    style,
-  } = props as ScrollScreenProps;
-
-  const ref = useRef<ScrollView>(null);
-
-  const { scrollEnabled, onContentSizeChange, onLayout } = useAutoPreset(
-    props as AutoScreenProps
-  );
-
-  // Add native behavior of pressing the active tab to scroll to the top of the content
-  // More info at: https://reactnavigation.org/docs/use-scroll-to-top/
-  useScrollToTop(ref);
-
-  return (
-    <ScrollView
-      {...{ keyboardShouldPersistTaps, scrollEnabled, ref }}
-      {...ScrollViewProps}
-      onLayout={(e) => {
-        onLayout(e);
-        ScrollViewProps?.onLayout?.(e);
-      }}
-      onContentSizeChange={(w: number, h: number) => {
-        onContentSizeChange(w, h);
-        ScrollViewProps?.onContentSizeChange?.(w, h);
-      }}
-      style={[$outerStyle, ScrollViewProps?.style, style]}
-      contentContainerStyle={[
-        $innerStyle,
-        ScrollViewProps?.contentContainerStyle,
-        contentContainerStyle,
-      ]}
-    >
-      {children}
-    </ScrollView>
-  );
-}
-
-/**
- * Represents a screen component that provides a consistent layout and behavior for different screen presets.
- * The `Screen` component can be used with different presets such as "fixed", "scroll", or "auto".
- * It handles safe area insets, status bar settings, keyboard avoiding behavior, and scrollability based on the preset.
- * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Screen/}
- * @param {ScreenProps} props - The props for the `Screen` component.
- * @returns {JSX.Element} The rendered `Screen` component.
- */
-export function Screen(props: ScreenProps) {
-  const {
-    theme: { colors },
-    themeContext,
-  } = useAppTheme();
-  const {
-    backgroundColor,
-    KeyboardAvoidingViewProps,
-    keyboardOffset = 0,
-    safeAreaEdges,
-    StatusBarProps,
-    statusBarStyle,
+    style: $styleOverride,
+    ...rest
   } = props;
+  const { themed } = useAppTheme();
 
-  const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges);
+  const i18nText = tx && translate(tx, txOptions);
+  const content = i18nText || text || children;
+
+  const preset: Presets = props.preset ?? "default";
+  const $styles: StyleProp<TextStyle> = [
+    $rtlStyle,
+    themed($presets[preset]),
+    weight && $fontWeightStyles[weight],
+    size && $sizeStyles[size],
+    $styleOverride,
+  ];
 
   return (
-    <View
-      style={[
-        $containerStyle,
-        { backgroundColor: backgroundColor || colors.background },
-        $containerInsets,
-      ]}
-    >
-      <StatusBar
-        style={statusBarStyle || (themeContext === "dark" ? "light" : "dark")}
-        {...StatusBarProps}
-      />
-
-      <KeyboardAvoidingView
-        behavior={isIos ? "padding" : "height"}
-        keyboardVerticalOffset={keyboardOffset}
-        {...KeyboardAvoidingViewProps}
-        style={[$keyboardAvoidingViewStyle, KeyboardAvoidingViewProps?.style]}
-      >
-        {isNonScrolling(props.preset) ? (
-          <ScreenWithoutScrolling {...props} />
-        ) : (
-          <ScreenWithScrolling {...props} />
-        )}
-      </KeyboardAvoidingView>
-    </View>
+    <RNText {...rest} style={$styles}>
+      {content}
+    </RNText>
   );
 }
 
-const $containerStyle: ViewStyle = {
-  flex: 1,
-  height: "100%",
-  width: "100%",
+const $sizeStyles = {
+  xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,
+  xl: { fontSize: 24, lineHeight: 34 } satisfies TextStyle,
+  lg: { fontSize: 20, lineHeight: 32 } satisfies TextStyle,
+  md: { fontSize: 18, lineHeight: 26 } satisfies TextStyle,
+  sm: { fontSize: 16, lineHeight: 24 } satisfies TextStyle,
+  xs: { fontSize: 14, lineHeight: 21 } satisfies TextStyle,
+  xxs: { fontSize: 12, lineHeight: 18 } satisfies TextStyle,
 };
 
-const $keyboardAvoidingViewStyle: ViewStyle = {
-  flex: 1,
-};
+const $fontWeightStyles = Object.entries(typography.primary).reduce(
+  (acc, [weight, fontFamily]) => {
+    return { ...acc, [weight]: { fontFamily } };
+  },
+  {}
+) as Record<Weights, TextStyle>;
 
-const $outerStyle: ViewStyle = {
-  flex: 1,
-  height: "100%",
-  width: "100%",
-};
+const $baseStyle: ThemedStyle<TextStyle> = (theme) => ({
+  ...$sizeStyles.sm,
+  ...$fontWeightStyles.normal,
+  color: theme.colors.text,
+});
 
-const $innerStyle: ViewStyle = {
-  justifyContent: "flex-start",
-  alignItems: "stretch",
+const $presets: Record<Presets, ThemedStyleArray<TextStyle>> = {
+  default: [$baseStyle],
+  bold: [$baseStyle, { ...$fontWeightStyles.bold }],
+  heading: [
+    $baseStyle,
+    {
+      ...$sizeStyles.xxl,
+      ...$fontWeightStyles.bold,
+    },
+  ],
+  subheading: [$baseStyle, { ...$sizeStyles.lg, ...$fontWeightStyles.medium }],
+  formLabel: [$baseStyle, { ...$fontWeightStyles.medium }],
+  formHelper: [$baseStyle, { ...$sizeStyles.sm, ...$fontWeightStyles.normal }],
 };
+const $rtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {};
 ```
 
 </details>
@@ -2987,6 +2844,7 @@ const EpisodeCard = observer(function EpisodeCard({
 +  } = useAppTheme()
 
   const liked = useSharedValue(isFavorite ? 1 : 0)
+
   const imageUri = useMemo<ImageSourcePropType>(() => {
     return rnrImages[Math.floor(Math.random() * rnrImages.length)]
   }, [])
@@ -3075,7 +2933,7 @@ const EpisodeCard = observer(function EpisodeCard({
           </View>
         )
       },
-    [themed],
++   [themed],
   )
 
   return (
@@ -3087,14 +2945,14 @@ const EpisodeCard = observer(function EpisodeCard({
         HeadingComponent={
 +          <View style={themed($metadata)}>
             <Text
-              style={themed($metadataText)}
++             style={themed($metadataText)}
               size="xxs"
               accessibilityLabel={episode.datePublished.accessibilityLabel}
             >
               {episode.datePublished.textLabel}
             </Text>
             <Text
-+              style={themed($metadataText)}
++             style={themed($metadataText)}
               size="xxs"
               accessibilityLabel={episode.duration.accessibilityLabel}
             >
@@ -3109,7 +2967,7 @@ const EpisodeCard = observer(function EpisodeCard({
           <Button
             onPress={handlePressFavorite}
             onLongPress={handlePressFavorite}
-            style={themed([$favoriteButton, isFavorite && $unFavoriteButton])}
++           style={themed([$favoriteButton, isFavorite && $unFavoriteButton])}
             accessibilityLabel={
               isFavorite
                 ? translate("demoPodcastListScreen.accessibility.unfavoriteIcon")
@@ -3134,7 +2992,6 @@ const EpisodeCard = observer(function EpisodeCard({
   )
 })
 
-// #region Styles
 const $screenContentContainer: ViewStyle = {
   flex: 1,
 }
@@ -3214,7 +3071,6 @@ const $labelStyle: TextStyle = {
 const $emptyStateImage: ImageStyle = {
   transform: [{ scaleX: isRTL ? -1 : 1 }],
 }
-// #endregion`
 ```
 
 ## Side Quests
