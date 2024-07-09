@@ -67,7 +67,7 @@ return (
 
 Now let's head to our `Screen` component and update the existing scrolling screen to use a `KeyboardAvoidingScrollview` instead of a basic `ScrollView`.
 
-### Update our Screen component
+### Update our `Screen` component
 
 In **src/components/Screen.tsx**
 
@@ -201,7 +201,7 @@ Since we don't necessarily want a toolbar on every scrolling screen (ie. even th
 
 In _src/app/(app)/(tabs)/profile.tsx_:
 
-1. Wrap the Screen component in a fragment
+1. Wrap the `Screen` component in a fragment
 2. Import `KeyboardToolbar` from `react-native-keyboard-controller`
 
 ```tsx
@@ -735,7 +735,7 @@ In _src/components/SelectField.tsx_:
               style={$searchClearButton}
               onPress={() => setSearchValue("")}
             >
-              <Icon name="circleX" color={colors.text} size={20} />
+              <Icon icon="xCircle" color={colors.text} size={20} />
             </TouchableOpacity>
           ) : undefined;
         }}
