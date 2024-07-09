@@ -45,7 +45,7 @@ Let's start by ensuring we can always see our input fields on the profile screen
 
 ### Add Keyboard Provider
 
-We'll start by wrapping our app with KeyboardProvider in the entry file.
+We'll start by wrapping our app with `KeyboardProvider` in the entry file.
 
 Do the following in **src/app/\_layout.tsx**:
 
@@ -65,13 +65,13 @@ return (
 );
 ```
 
-Now let's head to our Screen component and update the existing scrolling screen to use a KeyboardAvoidingScrollview instead of a basic ScrollView.
+Now let's head to our `Screen` component and update the existing scrolling screen to use a `KeyboardAvoidingScrollview` instead of a basic `ScrollView`.
 
 ### Update our Screen component
 
 In **src/components/Screen.tsx**
 
-Notice that we're already using a KeyboardAvoidingView in the main screen component.
+Notice that we're already using a `KeyboardAvoidingView` in the main screen component.
 
 ```tsx
 export function Screen(props: ScreenProps) {
@@ -107,6 +107,7 @@ export function Screen(props: ScreenProps) {
 }
 ```
 
+> [!NOTE]
 > This works great for some views, keeping floating buttons at the bottom of a view when the keyboard is open for example, but has trouble managing on views with scrolling so we need another solution.
 
 <details><summary>Bad Keyboard Avoidance Demo</summary>
@@ -116,6 +117,10 @@ export function Screen(props: ScreenProps) {
 <br/>
 
 To fix this, let's head into the `ScreenWithScrolling` component (in the same file, just up above) and replace the existing `Scrollview` with a `KeyboardAwareScrollView`. We can keep all the existing props, and see how this helps.
+
+```diff
++ import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
+```
 
 ```diff
 -    <ScrollView>
@@ -137,6 +142,16 @@ We're getting somewhere now, but lets add some padding to offset the bottom of t
 1. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
 2. Destructure that prop in our `ScreenWithScrolling` component, preferrably with a default of 0
 3. Pass `bottomOffset` in to the `KeyboardAwareScrollView`
+4. In _src/app/(app)/(tabs)/profile.tsx_ add `bottomOffset` prop to the `Screen` component.
+
+```diff
+<Screen
+        preset="scroll"
+        contentContainerStyle={$container}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={spacing.md}
+        >
+```
 
 There we go! The keyboard isn't blocking any of our fields.
 
@@ -148,7 +163,7 @@ This is a known issue when nesting `KeyboardAvoidingView` and `KeyboardAwareScro
 
 We don't really need both when we're using the `KeyboardAwareScrollView`, but we definitely want to keep avoiding the keyboard for non-scrolling screens. Let's enable the `KeyboardAvoidingView` only if it's a fixed screen.
 
-Reuse the `isNonScrolling` function and add an `enable` prop to the KeyboardAvoidingView.
+Reuse the `isNonScrolling` function and add an `enable` prop to the `KeyboardAvoidingView`.
 
 ```diff
  <KeyboardAvoidingView
@@ -178,7 +193,7 @@ To fix this, in our `Screen` component update the `KeyboarAvoidingView` behavior
 
 Not that keyboard avoiding isn't great, but it's quite a pain to have to scroll to see the other text fields. On top of that, if you scroll past, or haven't scrolled enough, a user might not even know there's an input to see!
 
-A toolbar with inputs to navigate between textfields and close the keyboard when we're done is a great native feeling solution.
+A toolbar with inputs to navigate between text fields and close the keyboard when we're done is a great native feeling solution.
 
 ### Add toolbar to Profile Screen
 
@@ -202,13 +217,14 @@ import { KeyboardToolbar } from "react-native-keyboard-controller";
 </>
 ```
 
+> [!IMPORTANT]
 > Verify that this works as expected, with arrows to move between fields and closing the keyboard with the done button instead of simply pressing outside an input or hitting return on the keyboard.
 
 ### Update bottomOffset
 
 Now that we've got the toolbar added, you might notice that there is a slight overlap with the two text fields lower down on our screen. You might be thinking _"But I fixed this earlier when I added the bottom offset to the screen!"_ and you would be right.
 
-Since we added the toolbar outside of the `Screen` component, theIn adding the toolbar, we need to also offset that height as the KeyboardAwareScrollView isn't aware of it since it's outside of the `Screen` component.
+Since we added the `KeyboardToolbar` outside of the `Screen` component, we need to also offset that height as the `KeyboardAwareScrollView`
 
 - Try inspecting the toolbar and checking the height!
 - You'll find that the toolbar has a height of 42px on both iOS and android so lets add that to our existing `bottomOffset` prop on our profile screen.
@@ -232,11 +248,12 @@ Instead, let's consider a select field, with a predefined list of skills that a 
 
 ### Build Select Field
 
+> [!TIP]
 > The Ignite Cookbook by Infinite Red has a great recipe for building this component so we're going to leverage parts of that and incorporate it into our app! [Check it out here.](https://ignitecookbook.com/docs/recipes/SelectFieldWithBottomSheet)
 
 1. Create the `SelectField.tsx` component file.
 
-Instead of extending the TextField component with more props and functionality, we'll be creating a wrapper for the TextField component that contains additional functionality.
+Instead of extending the `TextField` component with more props and functionality, we'll be creating a wrapper for the `TextField` component that contains additional functionality.
 
 We'll start by creating a new file in the components directory.
 
@@ -244,11 +261,12 @@ We'll start by creating a new file in the components directory.
 touch ./src/components/SelectField.tsx
 ```
 
-Let's add some preliminary code to the file. Since the TextInput has its own touch handlers for focus, we'll want to disable that by wrapping it in a View with no pointer-events. The new TouchableOpacity will trigger our options sheet.
+Let's add some preliminary code to the file. Since the `TextField` has its own touch handlers for focus, we'll want to disable that by wrapping it in a `View` with no pointer-events. The new `TouchableOpacity` will trigger our options sheet.
 
 ```tsx
 import React, { forwardRef, Ref, useImperativeHandle } from "react";
 import { View, TouchableOpacity } from "react-native";
+import { observer } from "mobx-react-lite";
 import { TextField, TextFieldProps } from "./TextField";
 
 export interface SelectFieldProps
@@ -258,36 +276,38 @@ export interface SelectFieldProps
   > {}
 export interface SelectFieldRef {}
 
-export const SelectField = forwardRef(function SelectField(
-  props: SelectFieldProps,
-  ref: Ref<SelectFieldRef>
-) {
-  const { ...TextFieldProps } = props;
+export const SelectField = observer(
+  forwardRef(function SelectField(
+    props: SelectFieldProps,
+    ref: Ref<SelectFieldRef>
+  ) {
+    const { ...TextFieldProps } = props;
 
-  const disabled =
-    TextFieldProps.editable === false || TextFieldProps.status === "disabled";
+    const disabled =
+      TextFieldProps.editable === false || TextFieldProps.status === "disabled";
 
-  useImperativeHandle(ref, () => ({}));
+    useImperativeHandle(ref, () => ({}));
 
-  return (
-    <>
-      <TouchableOpacity activeOpacity={1}>
-        <View pointerEvents="none">
-          <TextField {...TextFieldProps} />
-        </View>
-      </TouchableOpacity>
-    </>
-  );
-});
+    return (
+      <>
+        <TouchableOpacity activeOpacity={1}>
+          <View pointerEvents="none">
+            <TextField {...TextFieldProps} />
+          </View>
+        </TouchableOpacity>
+      </>
+    );
+  })
+);
 ```
 
 2. Add New Props and Customize the TextField
 
-Now, we can start modifying the code we added in the previous step to support multiple options as well as making the TextField look like a SelectField.
+Now, we can start modifying the code we added in the previous step to support multiple options as well as making the `TextField` look like a `SelectField`.
 
 #### Add a Caret Icon Accessory
 
-Let's add an accessory to the input to make it look like a SelectField.
+Let's add an accessory to the input to make it look like a `SelectField`.
 
 ```tsx
 <TextField
@@ -300,15 +320,15 @@ Let's add an accessory to the input to make it look like a SelectField.
 
 #### Add props
 
-- The options prop can be any structure that you want (e.g. flat array of values, object where the key is the option value and the value is the label, etc). For our SelectField guide, we'll be doing an array of objects.
+- The options prop can be any structure that you want (e.g. flat array of values, object where the key is the option value and the value is the label, etc). For our `SelectField` guide, we'll be doing an array of objects.
 
 - We will support multi-select (by default) as well as a single select.
 
 - We will override the value prop.
 
-- A new renderValue prop can be used to format and display a custom text value. This can be useful when the TextField is not multiline, but your SelectField is.
+- A new renderValue prop can be used to format and display a custom text value. This can be useful when the `TextField` is not multiline, but your `SelectField` is.
 
-- Additionally, we'll add a new event callback called onSelect since that makes more sense for a SelectField. However, feel free to override TextField's onChange if you prefer.
+- Additionally, we'll add a new event callback called `onSelect` since that makes more sense for a `SelectField`. However, feel free to override `TextField`'s `onChange` if you prefer.
 
 ```tsx
 export interface SelectFieldProps
@@ -334,7 +354,7 @@ const {
 
 #### Add Logic to Display Selected Options
 
-We'll add some code to display the selected options inside the TextField. This will attempt to use the renderValue formatter function and fallback to a joined string.
+We'll add some code to display the selected options inside the `TextField`. This will attempt to use the `renderValue` formatter function and fallback to a joined string.
 
 ```tsx
 const valueString =
@@ -347,12 +367,12 @@ const valueString =
 
 ### Replace SelectField for Skills TextField
 
-Now that we've got the SelectField (ie.our souped up TextField) let's replace the existing skills field on the Profile screen.
+Now that we've got the `SelectField` (ie.our souped up `TextField`) let's replace the existing skills field on the Profile screen.
 
 In _src/app/(app)/(tabs)/profile.tsx:_
 
-- Add a SelectField right below the existing skills TextField.
-- Copy over the labelTx to the corresponding SelectField prop
+- Add a `SelectField` right below the existing skills `TextField`.
+- Copy over the labelTx to the corresponding `SelectField` prop
 - We need some data, copy the following into a constant at the top of the file.
 
 <details><summary>Skills List</summary>
@@ -403,10 +423,10 @@ const skillsList: {
 </details>
 <br/>
 
-- Pass our new skillsList in for the options property
-- Add an onSelect prop that takes in `selected` and passes that through the `setProp` action for skills.
-- The value should be set to skills from our Profile model.
-- Remove the old skill TextField and Text label above it.
+- Pass our new `skillsList` in for the `options` property
+- Add an `onSelect` prop that takes in `selected` and passes that through the `setProp` action for skills.
+- The value should be set to skills from our `Profile` model.
+- Remove the old skill `TextField` and `Text` label above it.
 
 So far your select field should look like this:
 
@@ -419,7 +439,7 @@ So far your select field should look like this:
 />
 ```
 
-But now our Profile model is out of sync with the data we are providing it. Let's go update that!
+But now our `Profile` model is out of sync with the data we are providing it. Let's go update that!
 
 In _src/models/Profile.ts_:
 
@@ -431,15 +451,15 @@ types.optional(types.array(types.string), []);
 
 ### Add the Sheet Components
 
-Let's go back to building our SelectField now that we've got it added to our Profile screen and we'll add the functionality to view and select options.
+Let's go back to building our `SelectField` now that we've got it added to our Profile screen and we'll add the functionality to view and select options.
 
-In this step, we'll be adding the BottomSheetModal and related components and setting up the touch-events to show/hide it
+In this step, we'll be adding the `BottomSheetModal` and related components and setting up the touch-events to show/hide it.
 
 #### Add the `BottomSheetModalProvider`
 
-Since we will be using the BottomSheetModal component instead of BottomSheet, we will need to add a provider to your entry file.
+Since we will be using the `BottomSheetModal` component instead of `BottomSheet`, we will need to add a provider to your entry file.
 
-We're going to need our keyboard avoiding behavior in a later step, so make sure to add the provider nested within the existing KeyboardProvider.
+We're going to need our keyboard avoiding behavior in a later step, so make sure to add the provider nested within the existing `KeyboardProvider`.
 
 ```tsx
 <KeyboardProvider>
@@ -453,9 +473,233 @@ We're going to need our keyboard avoiding behavior in a later step, so make sure
 
 Now we will add the UI components that will display our options. This will be a basic example and we'll customize it a bit later.
 
-- Add onPress to set the values
-- Add observer around component so the bottom sheet has access to store updates
-- update it to show number of skills selected instead of listing them with renderValue
+```diff
++import {
++  BottomSheetBackdrop,
++  BottomSheetFlatList,
++  BottomSheetFooter,
++  BottomSheetModal,
++} from "@gorhom/bottom-sheet";
+import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
+import { TouchableOpacity, View, ViewStyle } from "react-native";
+import { observer } from "mobx-react-lite"
++import { useSafeAreaInsets } from "react-native-safe-area-context";
++import { spacing } from "../theme";
++import { Button } from "./Button";
+import { Icon } from "./Icon";
++import { ListItem } from "./ListItem";
+import { TextField, TextFieldProps } from "./TextField";
+
+export interface SelectFieldProps
+  extends Omit<TextFieldProps, "ref" | "onValueChange" | "onChange" | "value"> {
+  value?: string[];
+  renderValue?: (value: string[]) => string;
+  onSelect?: (newValue: string[]) => void;
+  multiple?: boolean;
+  options: { label: string; value: string }[];
+}
+export interface SelectFieldRef {
++  presentOptions: () => void;
++  dismissOptions: () => void;
+}
+
+export const SelectField = observer(forwardRef(function SelectField(
+  props: SelectFieldProps,
+  ref: Ref<SelectFieldRef>
+) {
+  const {
+    value = [],
+    onSelect,
+    renderValue,
+    options = [],
+    multiple = true,
+    ...TextFieldProps
+  } = props;
++  const sheet = useRef<BottomSheetModal>(null);
++  const { bottom } = useSafeAreaInsets();
+
+  const disabled =
+    TextFieldProps.editable === false || TextFieldProps.status === "disabled";
+
++  useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }));
+
+  const valueString =
+    renderValue?.(value) ??
+    value
+      .map((v) => options.find((o) => o.value === v)?.label)
+      .filter(Boolean)
+      .join(", ");
+
++  function presentOptions() {
++    if (disabled) return;
++    sheet.current?.present();
++ }
+
++  function dismissOptions() {
++    sheet.current?.dismiss();
++  }
+
+  return (
+    <>
+      <TouchableOpacity
+        activeOpacity={1}
++        onPress={presentOptions}
+      >
+        <View pointerEvents="none">
+          <TextField
+            {...TextFieldProps}
+            value={valueString}
+            RightAccessory={(props) => (
+              <Icon icon="caretRight" containerStyle={props.style} />
+            )}
+          />
+        </View>
+      </TouchableOpacity>
+
++     <BottomSheetModal
++       ref={sheet}
++       snapPoints={["50%"]}
++       stackBehavior="replace"
++       enableDismissOnClose
++       backdropComponent={(props) => (
++         <BottomSheetBackdrop
++           {...props}
++           appearsOnIndex={0}
++           disappearsOnIndex={-1}
++         />
++       )}
++       footerComponent={
++         !multiple
++           ? undefined
++           : (props) => (
++               <BottomSheetFooter
++                 {...props}
++                 style={$bottomSheetFooter}
++                 bottomInset={bottom}
++               >
++                 <Button
++                   text="Dismiss"
++                   preset="reversed"
++                   onPress={dismissOptions}
++                 />
++               </BottomSheetFooter>
++             )
++       }
++     >
++       <BottomSheetFlatList
++         style={{ marginBottom: bottom + (multiple ? spacing.xl * 2 : 0) }}
++         data={options}
++         keyExtractor={(o) => o.value}
++         renderItem={({ item, index }) => (
++           <ListItem
++             text={item.label}
++             topSeparator={index !== 0}
++             style={$listItem}
++           />
++         )}
++       />
++     </BottomSheetModal>
+    </>
+  );
+}))
+
++const $bottomSheetFooter: ViewStyle = {
++  paddingHorizontal: spacing.lg,
++  paddingBottom: spacing.xs,
++};
+
++const $listItem: ViewStyle = {
++  paddingHorizontal: spacing.lg,
++};
+```
+
+#### Add Selected State to Options and Hook Up Callback
+
+The last step is to add the selected state to our options inside the sheet as well as hook up the callback to change the value.
+
+1. Add a function to return an array with a specific value removed:
+
+```tsx
+function without<T>(array: T[], value: T) {
+  return array.filter((v) => v !== value);
+}
+```
+
+2. Use that function in a new updateValue function that we will call when a user selects one of the list items
+
+```tsx
+function updateValue(optionValue: string) {
+  if (value.includes(optionValue)) {
+    onSelect?.(multiple ? without(value, optionValue) : []);
+  } else {
+    onSelect?.(multiple ? [...value, optionValue] : [optionValue]);
+    if (!multiple) dismissOptions();
+  }
+}
+```
+
+3. Update the `ListItem` within the `BottomSheetFlatList` to call `updateValue` on press and some UI sprinkles to show which items are selected.
+
+```diff
++import {spacing, color} from '../theme'
+```
+
+```diff
+<ListItem
+text={item.label}
+topSeparator={index !== 0}
+style={$listItem}
++rightIcon={value.includes(item.value) ? "check" : undefined}
++rightIconColor={colors.palette.angry500}
++onPress={() => updateValue(item.value)}
+/>
+```
+
+And we're done building the basic select field component with a bottom sheet modal to display the options! Let's test it out and add some finishing touches.
+
+### Finishing Touches
+
+At this point it looks great, but notice when you select a large number of options, the comma separated list in the `TextField` isn't ideal for reading and is information that is better consumer in the bottom sheet.
+
+Let's update that to display the number of skills selected instead of listing them by passing in a custom `renderValue` prop
+
+Back in _src/app/(app)/(tabs)/profile.tsx_:
+
+1. Add a renderValue prop with the following function for displaying the number of items selected.
+
+```diff
+<SelectField
+options={skillsList}
+labelTx="demoProfileScreen.skills"
+onSelect={(selected) => setProp("skills", selected)}
+value={skills}
++renderValue={(value) => t("demoProfileScreen.skillsSelected", { count: value.length })}
+/>
+```
+
+2. That's a new text string so in _srx/i18n/en.ts_ add the following in the `demoProfileScreen` dictionary.
+
+```tsx
+skillsSelected: {
+      one: "{{count}} skill selected",
+      other: "{{count}} skills selected",
+    },
+```
+
+Looks good now! Try selecting, 0, 1, and many options to see it update accordingly.
+
+3. The search field is a little close to its neighbors, so lets add the existing style we're using on the other inputs as well.
+
+```diff
+<SelectField
+options={skillsList}
+labelTx="demoProfileScreen.skills"
+onSelect={(selected) => setProp("skills", selected)}
+value={skills}
+renderValue={(value) => t("demoProfileScreen.skillsSelected", { count: value.length })}
+containerStyle={$textField}
+/>
+```
 
 ## Exercise 4: Full text search in the dropdown
 
@@ -468,3 +712,10 @@ Now we will add the UI components that will display our options. This will be a 
 ## See the solution
 
 Switch to branch: `02-inputs-solution`
+
+````
+
+```
+
+```
+````
