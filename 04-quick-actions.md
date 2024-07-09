@@ -94,7 +94,7 @@ import { useQuickActionRouting, RouterAction } from "expo-quick-actions/router"
 ```tsx
 useQuickActionRouting()
 
-useEffect(() => {
+React.useEffect(() => {
   QuickActions.setItems<RouterAction>([
     {
       title: "Update your profile",
@@ -124,10 +124,12 @@ A quick action to the Podcasts tab would be... fine, but what if it could take u
   title: "Check out the latest podcast",
   subtitle: "What's everyone saying on RN Radio?",
   icon: Platform.OS === "android" ? undefined : "location",
-  id: "0",
+  id: "1",
   params: { href: "/(app)/(tabs)/podcasts/latest" },
 },
 ```
+
+🏃**Try it.** Try out your new quick action. 404 much?
 
 Spoiler alert: we're going to create that new route next.
 
@@ -140,7 +142,9 @@ Spoiler alert: we're going to create that new route next.
 3. Setup your file like this:
 
 ```tsx
-// TODO: a basic empty component
+export default () => {
+  return null;
+}
 ```
 
 🏃**Try it.** Try out your new quick action. Does it should at least open this page ... which doesn't have much (or anything, really).
@@ -150,17 +154,42 @@ Spoiler alert: we're going to create that new route next.
 To make this route actually do something, we'll use a `Redirect` component, which will send us to the correct route, once we know what that is.
 Write all of the following code in **src/app/(app)/(tabs)/podcasts/latest.tsx**:
 
-4. Query the latest podcasts, much like we do in **podcasts/index.tsx**:
+4. Query the latest podcasts, much like we do in **podcasts/index.tsx**. Switch out your `latest` screen for this:
 
 ```tsx
-  // TODO
+import React from "react"
+import { observer } from "mobx-react-lite"
+import { Redirect } from 'expo-router';
+import { useStores } from 'src/models';
+
+export default observer(() => {
+  const { episodeStore } = useStores();
+  if (episodeStore.episodes.length > 0) {
+    return <Redirect href={`/(app)/(tabs)/podcasts/${episodeStore.episodes.slice()[0].guid}`} />;
+  }
+  return <Redirect href={`/(app)/(tabs)/podcasts/`} />;;
+});
+
 ```
 
-5. Once the query is complete, return the `Redirect` instead, taking the user to the latest podcast that we've found.
-
-> We would, of course, want to add some error handling here. We could also have more advanced logic to fall back to the podcast cache.
+> Of course, we're relying on the podcasts already being loaded here; that's not a good assumption. In a real-life app, you could show a spinner if no podcasts are loaded, and then show an error if loading fails.
 
 🏃**Try it.** Try out your new quick action. Hopefully it actually takes you to the latest podcast.
+
+### Fix Expo Router back behavior
+
+You may have noticed your back button not working. This can happen when going directly to a deep link, as your app will not know where to go back to. Expo Router has a setting to fix this.
+
+In **src/app/(app)/(tabs)/podcast/_layout.tsx**, add this:
+
+```tsx
+// eslint-disable-next-line camelcase
+export const unstable_settings = {
+  // Ensure any route can link back to `/`
+  initialRouteName: 'index',
+};
+
+```
 
 ## Exercise 4: Customizing quick action icons with the `expo-quick-actions` config plugin.
 
