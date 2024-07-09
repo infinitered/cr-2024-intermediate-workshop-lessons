@@ -597,6 +597,7 @@ export const SelectField = observer(forwardRef(function SelectField(
 +             style={$listItem}
 +           />
 +         )}
++         keyboardShouldPersistTaps="always"
 +       />
 +     </BottomSheetModal>
     </>
@@ -665,30 +666,7 @@ Let's update that to display the number of skills selected instead of listing th
 
 Back in _src/app/(app)/(tabs)/profile.tsx_:
 
-1. Add a renderValue prop with the following function for displaying the number of items selected.
-
-```diff
-<SelectField
-options={skillsList}
-labelTx="demoProfileScreen.skills"
-onSelect={(selected) => setProp("skills", selected)}
-value={skills}
-+renderValue={(value) => t("demoProfileScreen.skillsSelected", { count: value.length })}
-/>
-```
-
-2. That's a new text string so in _srx/i18n/en.ts_ add the following in the `demoProfileScreen` dictionary.
-
-```tsx
-skillsSelected: {
-      one: "{{count}} skill selected",
-      other: "{{count}} skills selected",
-    },
-```
-
-Looks good now! Try selecting, 0, 1, and many options to see it update accordingly.
-
-3. The search field is a little close to its neighbors, so lets add the existing style we're using on the other inputs as well.
+1. The search field is a little close to its neighbors, so lets add the existing style we're using on the other inputs as well.
 
 ```diff
 <SelectField
@@ -701,21 +679,177 @@ containerStyle={$textField}
 />
 ```
 
+2. Add a renderValue prop with the following function for displaying the number of items selected.
+
+```diff
+<SelectField
+options={skillsList}
+labelTx="demoProfileScreen.skills"
+onSelect={(selected) => setProp("skills", selected)}
+value={skills}
++renderValue={(value) => t("demoProfileScreen.skillsSelected", { count: value.length })}
+/>
+```
+
+3. That's a new txKey so in _srx/i18n/en.ts_ add the following in the `demoProfileScreen` dictionary.
+
+```tsx
+skillsSelected: {
+      one: "{{count}} skill selected",
+      other: "{{count}} skills selected",
+    },
+```
+
+Looks good now! Try selecting, 0, 1, and many options to see it update accordingly.
+
 ## Exercise 4: Full text search in the dropdown
 
-## Side Quests
+For our last piece of our form, we're going to update our `SelectField` a little more and make it easier for users to find certain skills with a search bar!
+
+In _src/components/SelectField.tsx_:
+
+### Set Up for Searchability
+
+1. Update the `SelectField` component to have an optional boolean property of `searchable`. We'll set the default value to `false`.
+
+2. Add another optional prop to pass in `TextFieldProps` to our search `TextField` for customization
+
+3. Add a `useState` hook to store and set search values (we'll use these in the next step)
+
+### Add Search Header to Bottom Sheet Modal
+
+1. Add a `ListHeaderComponent` prop on the `BottomSheetFlatList` that renders if `searchable` is `true`
+
+```tsx
+<BottomSheetFlatList
+  //...
+  ListHeaderComponent={
+    searchable ? (
+      <TextField
+        value={searchValue}
+        onChangeText={(searchInput) => setSearchValue(searchInput)}
+        containerStyle={$searchContainer}
+        RightAccessory={() => {
+          return searchValue ? (
+            <TouchableOpacity
+              style={$searchClearButton}
+              onPress={() => setSearchValue("")}
+            >
+              <Icon name="circleX" color={colors.text} size={20} />
+            </TouchableOpacity>
+          ) : undefined;
+        }}
+        {...SearchFieldProps}
+      />
+    ) : undefined
+  }
+/>;
+
+//...
+
+const $searchContainer: ViewStyle = {
+  paddingHorizontal: spacing.lg,
+};
+
+const $searchClearButton: ViewStyle = {
+  overflow: "hidden",
+  height: 40,
+  paddingHorizontal: spacing.xs,
+  alignContent: "center",
+  justifyContent: "center",
+};
+```
+
+This looks a little tight with the 50% snapPoint we have set, why don't we make it full screen if the list is searchable.
+
+2. Update the snapPoints on the `BottomSheetModal` to be dynamic based on our `searchable` boolean
+
+```diff
+<BottomSheetModal
+  ref={sheet}
++ snapPoints={searchable ? ["100%"] : ["50%"]}
+/>
+```
+
+3. It's a little close to the top of the view, so let's add some dynamic styling as well
+
+```diff
++const { bottom, top } = useSafeAreaInsets()
+
+//...
+
+<BottomSheetFlatList
+style={{
++             marginTop: searchable ? top : undefined,
+              marginBottom: bottom + spacing.xl * 2 + spacing.md,
+            }}
+```
+
+4. We want this header to stay at the top while we scroll, so let's make it sticky
+
+```diff
+<BottomSheetFlatList
+//...
++stickyHeaderIndices={searchable ? [0] : undefined}
+/>
+```
+
+### Filter data based on search values
+
+Let's put this search to work and update our `BottomSheetFlatList` options to be filtered by the search input value
+
+1. Filter the options data if `searchable` is `true`
+
+```tsx
+// Filter options for partial name if searchable is true
+const filteredOptions = searchable
+  ? options.filter((o) =>
+      o.label.toLowerCase().includes(searchValue.toLowerCase())
+    )
+  : options;
+```
+
+2. Update `BottomSheetFlatList` data property to use the new `filteredOptions`
+
+### Clean Up Search and Fix Keyboard Dismissal
+
+You might have noticed a couple oddities in the behavior when navigating through the form into the `SelectField`, or leaving the modal with a search value. Let's clean some stuff up!
+
+#### Clear the search when exiting/closing the modal
+
+Call setSearchValue("") in the following places
+
+1. `onPress` for the `BottomSheetBackdrop`
+2. Within the `dismissOptions` function before dismissal
+
+#### Dismiss the keyboard when opening the `BottomSheetModal`
+
+If we're focused on a different text input when we click into the `SelectField` component, the keyboard stays up over the `BottomSheetModal`. Let's fix that!1
+
+1. Add `Keyboard.dismiss()` within the `presentOptions` function
+
+#### Add `KeyboardToolbar` to help with closing keyboard
+
+That toolbar we added to the keyboard to navigate through our form was great so let's add one here as well. We only have one field though so no need for the arrows to jump between inputs, we'll just use the Done button.
+
+1. Add a `KeyboardToolbar` component in a fragment with our `BottomSheetModal`
+
+#### Fix bottom padding when keyboard is open to search
+
+Notice when we focus on the search `TextInput` and scroll to the bottom of our full skills list the bottom is somewhat cut off.
+
+1. Add a useState hook that stores and sets a value paddingBottom for our `BottomSheetFlatList`
+2. In the search `TextField` component, update `onFocus` and `onBlur` and to set and clear the paddingBottom value.
+3. Add the style in the `contentContainerStyle` on the `BottomSheetFlatList`
+
+🏃**Try it.** Does your profile form look better and behave as you would expect it to? Is the keyboard dismissing as expected and the search behaving how you imagined?
+
+<!-- ## Side Quests
 
 - Form validation?
 - Improve the slider
-- ???
+- ??? -->
 
 ## See the solution
 
 Switch to branch: `02-inputs-solution`
-
-````
-
-```
-
-```
-````
