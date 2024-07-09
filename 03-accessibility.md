@@ -62,9 +62,32 @@ Learn more:
   - [Turning on VoiceOver on your iPhone](https://support.apple.com/guide/iphone/turn-on-and-practice-voiceover-iph3e2e415f/ios)
   - [VoiceOver gestures](https://support.apple.com/guide/iphone/use-voiceover-gestures-iph3e2e2281/ios)
 
+Common gestures:
+  - Swipe right: go to next control
+  - Swipe left: go to previous control
+  - Single tap: focus control
+  - Double tap: select / interact with control
+  - ???: Go to home screen
+
+> Use `npx expo run:ios --device` to build the app to your USB-connected device.
+
 ### Android device
 
-// TODO
+You can use TalkBack on an Android emulator, but it's already installed on your Android phone, so that might be easier. Follow the directions to enable TalkBack. It's recommended that you enable the TalkBack shortcut. This will put a presistent button on your screen that lets you turn TalkBack on and off quickly.
+
+Learn more:
+  - [Turning on TalkBack / enable the TalkBack shortcut](https://support.google.com/accessibility/android/answer/6007100?sjid=17339591389191507281-NA)
+  - [TalkBack overview](https://support.google.com/accessibility/android/answer/6283677?hl=en).
+  - [Installing TalkBack on an Android emulator](https://reactnative.dev/docs/accessibility#testing-talkback-support-android)
+
+Common gestures:
+  - Swipe right: go to next control
+  - Swipe left: go to previous control
+  - Single tap: focus control
+  - Double tap: select / interact with control
+  - ???: Go to home screen
+
+> Use `npx expo run:android --device` to build the app to your USB-connected device.
 
 ### Test accessiblity
 
@@ -151,8 +174,64 @@ But, the `Text` and `TextInput` controls are announcing their contents and their
 
 ### Extra Android features
 
-// TODO: Adapt `TextField` to implement `accessibilityLabelledBy` for Android.
-// NOTE: I haven't tried this implementation on Android yet, it might not be bad.
+7. The `TextField`'s sound OK, on Android, but Android has an `accessibilityLabelledBy` prop that can link inputs and their descriptors a little better. Let's adapt to that.
+
+In **TextField.tsx**, let's break out the platform-specific accessiblity props into separate objects just before the `return` statement:
+
+```tsx
+const labelId = nextId()
+
+const labelAccessibilityProps = Platform.OS === 'ios' ? {
+  accessibilityLabel:"",
+  accessibilityElementsHidden: true
+} : {
+  nativeId: labelId,
+}
+
+const textInputAccessibilityProps = Platform.OS === 'ios' ? {
+  accessibilityLabel:`${
+    accessibilityLabel || (labelTx ? translate(labelTx!, labelTxOptions) + ", text input" : "")
+  }`
+} : {
+  accessibilityLabel:"input",
+  accessibilityLabelledBy: labelId,
+}
+```
+
+Update your imports to add:
+```tsx
+import nextId from "react-id-generator";
+```
+
+and also pull in `Platform` from `react-native`.
+
+8. Remove the accessibility props from the label and text input controls, and spread those objects to use whatever accessiblity props are in play:
+
+```diff
+{!!(label || labelTx) && (
+  <Text
+-    accessibilityLabel=""
+-    accessibilityElementsHidden
+-    importantForAccessibility="no-hide-descendants"
++    {...labelAccessibilityProps}
+    preset="formLabel"
+    text={label}
+    tx={labelTx}
+
+@@ -206,9 +224,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
+  )}
+
+  <TextInput
+-    accessibilityLabel={`${
+-      accessibilityLabel || (labelTx ? translate(labelTx!, labelTxOptions) + ", text input" : "")
+-    }`}
++    {...textInputAccessibilityProps}
+    ref={input}
+    underlineColorAndroid={colors.transparent}
+    textAlignVertical="top"
+```
+
+🏃**Try it.** Kind of interesting how it focuses the entire `TextField` and lets you double-tap to start typing.
 
 ## Exercise 2: Toggles and sliders
 
@@ -219,15 +298,135 @@ accessibilityUnits="level"
 
 🏃**Try it.** With the Accessibilty Inspector, you'll need to change the value, leave the control, and then return, to really hear what's going on. This is a great one to try on a device if you have time. On a device, it'll update each time the slider is moved.
 
+### Android
+
+Woo boy! That slider isn't working well on Android. Did it crash on you?
+
+Apparently, `accessibilityIncrements` must output strings that can be cast to doubles on Android (strange!). The correct answer is most likely "pick a different control", but let's try for a minute to make lemonade out of lemons. Here's one idea: load the label up with a bunch of context:
+
+```diff
+<Text
++  accessibilityLabel={Platform.OS === 'ios'? "" : "React Native Familiarity level, set slider below from 0 to 4, 0 being a novice to 4 being a master of React Native."}
+  accessibilityElementsHidden
+  preset="formLabel"
+  tx="demoProfileScreen.rnFamiliarity"
+  style={{ marginBottom: spacing.xs }}
+/>
+  <Text
+    accessibilityElementsHidden
++    importantForAccessibility="no-hide-descendants"
+    tx={`demoProfileScreen.familiaritySubtitles.${rnFamiliarity}` as TxKeyPath}
+    style={$familiaritySubtitle}
+
+  />
+  <Slider
+-    accessibilityIncrements={[0, 1, 2, 3, 4].map((i) => translate(`demoProfileScreen.familiaritySubtitles.${i}` as TxKeyPath))}
++    accessibilityIncrements={Platform.OS === "ios" ? [0, 1, 2, 3, 4].map((i) => translate(`demoProfileScreen.familiaritySubtitles.${i}` as TxKeyPath)) : ["0","1","2","3","4"]}
+    accessibilityUnits="level"
+    minimumValue={0}
+    maximumValue={4}
+    minimumTrackTintColor={colors.tint}
+    maximumTrackTintColor={colors.palette.secondary500}
+    tapToSeek
+    step={1}
+    value={rnFamiliarity}
+    onValueChange={(value) => setProp("rnFamiliarity", value)}
+    style={$slider}
+    renderStepNumber
+```
+
+**Stuff that doesn't seem to work that maybe would have been helpful:** `Slider` doesn't seem to recognize `accessibilityLabelledBy`, and TalkBack isn't picking up `accessibilityHint` on the `Text` control.
+
+🏃**Try it.** Ehhh... if you have any better ideas here for how to salvage this slider, we're all ears!
+
 ## Exercise 3: That modal picker thing!
 
 // TODO: need some help, haha
 
 ## Exercise 4: Buttons and validation
 
-// TODO, let's make at least one field provide validation, and let's have it make sense with accessiblity
-// The button should be enabled at all times, and report the issues when submit is pressed but one of the required values isn't set
-// We can also work on proper communication of required values (e.g., say they're required)
+By default, the button actually comes out sounding pretty good! But, let's think ahead a little to what happens when you submit the form and the data isn't valid. Let's suppose name is a required field.
+
+### iOS
+iOS doesn't have the concept of "live regions", controls that break out of the typical accessiblity flow and announce their changes whenever they happen. But, we can use the `AccessibilityInfo` API to make announcements on demand. So, let's simulate announcing that a required field isn't populated on submission:
+
+1. Import `AccessibilityInfo` from `react-native`.
+
+2. Update the `onPress` function of the submit button:
+
+```tsx
+<Button
+  tx="demoProfileScreen.submitButton"
+  preset="filled"
+  onPress={() => {
+      if (name.trim() === "") {
+        AccessibilityInfo.announceForAccessibility(
+          "Submit failed. Name is required."
+        )
+      } else {
+        AccessibilityInfo.announceForAccessibility(
+          "Submit successful. Profile is updated."
+        )
+        console.log("Validation done. Submitting to API.")
+      }
+    }
+  }
+/>
+```
+
+### Android
+The above announcement would work on Android, as well. But we can try using live regions instead to interrup with changes to a validation field.
+
+1. Make the above code iOS platform specific with a `Platform.OS === 'ios' ...` conditional.
+
+2. In **TextField.tsx**, co-opt the helper text to act as validation text. If we had more time, we might paint it red, as well:
+
+```diff
+{!!(helper || helperTx) && (
+  <Text
+    preset="formHelper"
++    accessibilityLanguage="assertive"
+    text={helper}
+    tx={helperTx}
+    txOptions={helperTxOptions}
+    {...HelperTextProps}
+    style={$helperStyles}
+  />
+)}
+```
+
+Now, it should interrupt with changes.
+
+3. Back in **profile.tsx**, make a state variable containing name validation text:
+
+```tsx
+const [nameValidationText, setNameValidationText] = useState<string|undefined>(undefined)
+```
+
+Update the name text field to pass this to helper:
+
+```diff
+ <TextField
+  labelTx="demoProfileScreen.name"
+  containerStyle={$textField}
+  placeholderTx="demoProfileScreen.name"
+  value={name}
+  onChangeText={(text) => setProp("name", text)}
++  helper={nameValidationText}
+/>
+```
+
+4. In the button `onPress`, for Android, have it update the validation text:
+
+```tsx
+if (Platform.OS === 'android') {
+  if (name.trim() === "") {
+    setNameValidationText("name is required")
+  } else {
+    setNameValidationText(undefined)
+  }
+}
+```
 
 ## Side Quests
 
