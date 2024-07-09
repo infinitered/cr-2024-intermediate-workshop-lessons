@@ -99,7 +99,7 @@ React.useEffect(() => {
     {
       title: "Update your profile",
       subtitle: "Keep your deets up-to-date!",
-      icon: Platform.OS === "android" ? undefined : "location", // we'll come back to the Android icon
+      icon: Platform.OS === "android" ? undefined : "contact", // we'll come back to the Android icon
       id: "0",
       params: { href: "/(app)/(tabs)/profile" },
     },
@@ -123,7 +123,7 @@ A quick action to the Podcasts tab would be... fine, but what if it could take u
 {
   title: "Check out the latest podcast",
   subtitle: "What's everyone saying on RN Radio?",
-  icon: Platform.OS === "android" ? undefined : "location",
+  icon: Platform.OS === "android" ? undefined : "play",
   id: "1",
   params: { href: "/(app)/(tabs)/podcasts/latest" },
 },
@@ -195,7 +195,7 @@ export const unstable_settings = {
 
 Most of what we can do with `expo-quick-actions` is the result of the Expo Module API code inside of the package exposing the App Shortcuts / Quick Actions native API's. However, the package also ships with a config plugin that can make changes to the native project itself, specifically adding assets that can be used for custom icons to the native project.
 
-With iOS, it's typical to use SF Symbols for these icons, since they match the Operating System. However, with Android, any App Shortcuts can be dragged to your homescreen and treated as separate icons, so these icons should be adaptive icons, just like your app's homescreen icon itself. Let's add icons for each of our two app shortcuts.
+With iOS, it's typical to use SF Symbols for these icons, since they match the Operating System. Currently, we're using the "system" icons, of which there is just a few (check out the Side Quests below for advice on quickly switching to SF Symbols - there's a ton to choose from). However, with Android, any App Shortcuts can be dragged to your homescreen and treated as separate icons, so these icons should be adaptive icons, just like your app's homescreen icon itself. Let's add icons for each of our two app shortcuts.
 
 1. Add the `expo-quick-actions` plugin and configuration to **app.json** inside the `plugins` key:
 <!-- TODO: update these icons to the correct ones -->
@@ -206,11 +206,11 @@ plugins: [
     {
       "androidIcons": {
         "profile_icon": {
-          "foregroundImage": "./assets/icons/adaptive-icon-fav.png",
+          "foregroundImage": "./assets/icons/adaptive-icon-profile.png",
           "backgroundColor": "#29cfc1",
         },
          "podcast_icon": {
-          "foregroundImage": "./assets/icons/adaptive-icon-fav.png",
+          "foregroundImage": "./assets/icons/adaptive-icon-podcast.png",
           "backgroundColor": "#29cfc1",
         },
       },
@@ -227,19 +227,41 @@ plugins: [
 
 5. Update the `setItems` function to incorporate these icons:
 
-```tsx
-// TODO
+```diff
+QuickActions.setItems<RouterAction>([
+    {
+      title: "Update your profile",
+      subtitle: "Keep your deets up-to-date!",
+-      icon: Platform.OS === "android" ? undefined : "contact", // we'll come back to the Android icon
++      icon: Platform.OS === "android" ? "profile_icon" : "contact"
+      id: "0",
+      params: { href: "/(app)/(tabs)/profile" },
+    },
+    {
+      title: "Check out the latest podcast",
+      subtitle: "What's everyone saying on RN Radio?",
+-      icon: Platform.OS === "android" ? undefined : "play",
++      icon: Platform.OS === "android" ? "podcast_icon" : "play"
+      id: "1",
+      params: { href: "/(app)/(tabs)/podcasts/latest" },
+    },
+  ])
+}, [])
 ```
 
 🏃**Try it.** Run your app, letting the quick actions refresh, then try them out. Are the icons updated on Android? What happens when you drag an icon and drop it on your home screen?
 
 ## Side Quests
 
-### 1. Static quick actions in iOS
+### 1. Use SF Symbols icons
+
+[Read more on how to find good SF Symbols and change out your quick actions icons on iOS for them.](https://github.com/EvanBacon/expo-quick-actions?tab=readme-ov-file#sf-symbols).
+
+### 2. Static quick actions in iOS
 
 The config plugin also supports adding static actions on iOS- quick actions that will show up before the app is run. Convert the "profile" quick action into a static action using the [example here](https://github.com/EvanBacon/expo-quick-actions?tab=readme-ov-file#config-plugin).
 
-### 2. SF Symbols everywhere
+### 3. SF Symbols everywhere
 
 SF Symbols can be used inside your app, as well! Take some steps towards a UI that's more cohesive with the OS on iOS:
 
