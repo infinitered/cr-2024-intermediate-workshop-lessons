@@ -854,11 +854,11 @@ Notice when we focus on the search `TextInput` and scroll to the bottom of our f
 
 🏃**Try it.** Does your profile form look better and behave as you would expect it to? Is the keyboard dismissing as expected and the search behaving how you imagined?
 
-<!-- ## Side Quests
+## Side Quests
 
-- Form validation?
+- Form validation
 - Improve the slider
-- ??? -->
+- Use theming helpers for dark mode
 
 ## See the solution
 
