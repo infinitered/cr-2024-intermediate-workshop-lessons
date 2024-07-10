@@ -1,4 +1,4 @@
-# Module 04: “I was just resting my thumb!” - quick homescreen interactivity with Quick Actions
+# Module 04: “I was just resting my thumb!” - quick home screen interactivity with Quick Actions
 
 ### Goal
 
@@ -22,6 +22,7 @@ Let's use `expo-quick-actions` to add App Shortcuts (Android) / Quick Actions (i
 # Exercises
 
 ## Exercise 1. Quick actions "Hello World"
+
 > From here on out, regardless of platform, we're going to call these "quick actions" regardless of whether its Android or iOS, because using both terms all the time is just exhausting!
 
 Let's do the most simple thing possible: add an action to the long-press menu, and make it execute some code.
@@ -83,6 +84,7 @@ Technically (in native-land), the quick action parameters can be anything, but, 
 Add all of this code in **src/app/(app)/_layout.tsx** (this will help delay the setup until the user is "logged in"):
 
 2. Add imports:
+
 ```tsx
 import { Platform } from "react-native"
 // ...
@@ -91,6 +93,7 @@ import { useQuickActionRouting, RouterAction } from "expo-quick-actions/router"
 ```
 
 3. Inside the component, add the following:
+
 ```tsx
 useQuickActionRouting()
 
@@ -169,7 +172,6 @@ export default observer(() => {
   }
   return <Redirect href={`/(app)/(tabs)/podcasts/`} />;;
 });
-
 ```
 
 > Of course, we're relying on the podcasts already being loaded here; that's not a good assumption. In a real-life app, you could show a spinner if no podcasts are loaded, and then show an error if loading fails.
@@ -188,17 +190,17 @@ export const unstable_settings = {
   // Ensure any route can link back to `/`
   initialRouteName: 'index',
 };
-
 ```
 
 ## Exercise 4: Customizing quick action icons with the `expo-quick-actions` config plugin.
 
 Most of what we can do with `expo-quick-actions` is the result of the Expo Module API code inside of the package exposing the App Shortcuts / Quick Actions native API's. However, the package also ships with a config plugin that can make changes to the native project itself, specifically adding assets that can be used for custom icons to the native project.
 
-With iOS, it's typical to use SF Symbols for these icons, since they match the Operating System. Currently, we're using the "system" icons, of which there is just a few (check out the Side Quests below for advice on quickly switching to SF Symbols - there's a ton to choose from). However, with Android, any App Shortcuts can be dragged to your homescreen and treated as separate icons, so these icons should be adaptive icons, just like your app's homescreen icon itself. Let's add icons for each of our two app shortcuts.
+With iOS, it's typical to use SF Symbols for these icons, since they match the Operating System. Currently, we're using the "system" icons, of which there is just a few (check out the Side Quests below for advice on quickly switching to SF Symbols - there's a ton to choose from). However, with Android, any App Shortcuts can be dragged to your home screen and treated as separate icons, so these icons should be adaptive icons, just like your app's home screen icon itself. Let's add icons for each of our two app shortcuts.
 
 1. Add the `expo-quick-actions` plugin and configuration to **app.json** inside the `plugins` key:
 <!-- TODO: update these icons to the correct ones -->
+
 ```json
 plugins: [
   [

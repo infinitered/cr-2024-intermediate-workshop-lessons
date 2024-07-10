@@ -28,7 +28,7 @@ Maybe we could still save/persist the data instantly in MST, but the Submit butt
 - Keep text inputs always visible with `react-native-keyboard-controller`
   - Smoothly transition from field to field using the submit/next functionality on the keyboard, with the view scrolling to show the next text field
   - Properly handle keyboard dismissal for all scenarios, including numeric keypad on iOS
-- Add a multi-select downdown for the skills field, with the list contained in `react-native-bottom-sheet`
+- Add a multi-select dropdown for the skills field, with the list contained in `react-native-bottom-sheet`
   - Add text search to the list to make it easier to pick stuff without tons of scrolling
 
 ### Resources
@@ -139,7 +139,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 ### Pad for extra viewing comfort
 
-We're getting somewhere now, but lets add some padding to offset the bottom of the textfields just a little so we don't have any cutoff.
+We're getting somewhere now, but let's add some padding to offset the bottom of the text fields just a little so we don't have any cutoff.
 
 1. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
 2. Destructure that prop in our `ScreenWithScrolling` component, preferably with a default of 0
@@ -183,7 +183,7 @@ Reuse the `isNonScrolling` function and add an `enable` prop to the `KeyboardAvo
 
 If you're working on an android you might have noticed some weird behavior forcing the screen up when focusing on text inputs. The screen seems to be scrolling too far and focusing the input even though it is off screen.
 
-To fix this, in our `Screen` component update the `KeyboarAvoidingView` behavior property to "undefined" if not iOS. This should solve it, but needs a rebuild so make sure to kill your app and re-run `yarn android` to get it behaving correctly!
+To fix this, in our `Screen` component update the `KeyboardAvoidingView` behavior property to "undefined" if not iOS. This should solve it, but needs a rebuild so make sure to kill your app and re-run `yarn android` to get it behaving correctly!
 
 ```diff
  <KeyboardAvoidingView
@@ -228,7 +228,7 @@ Now that we've got the toolbar added, you might notice that there is a slight ov
 Since we added the `KeyboardToolbar` outside of the `Screen` component, we need to also offset that height as the `KeyboardAwareScrollView`
 
 - Try inspecting the toolbar and checking the height!
-- You'll find that the toolbar has a height of 42px on both iOS and android so lets add that to our existing `bottomOffset` prop on our profile screen.
+- You'll find that the toolbar has a height of 42px on both iOS and android so let's add that to our existing `bottomOffset` prop on our profile screen.
 
 ```tsx
 <Screen
@@ -245,7 +245,7 @@ And there you have it, keyboard avoidance and moving from field to field without
 
 For the next exercise we're going to switch gears and improve one of our form fields. The skills input is mediocre, especially if you type out more than a couple skills. A single text string with a comma separated list just isn't the right type or display for this data.
 
-Instead, let's consider a select field, with a predefined list of skills that a user can select from. We don't have this component yet so lets build it and then update our stores to hold the data as we expect.
+Instead, let's consider a select field, with a predefined list of skills that a user can select from. We don't have this component yet so let's build it and then update our stores to hold the data as we expect.
 
 ### Build Select Field
 
@@ -677,7 +677,7 @@ Let's update that to display the number of skills selected instead of listing th
 
 Back in _src/app/(app)/(tabs)/profile.tsx_:
 
-1. The search field is a little close to its neighbors, so lets add the existing style we're using on the other inputs as well.
+1. The search field is a little close to its neighbors, so let's add the existing style we're using on the other inputs as well.
 
 ```diff
 <SelectField
@@ -729,7 +729,7 @@ In _src/components/SelectField.tsx_:
 
 3. Add a `useState` hook to store and set search values (we'll use these in the next step)
 
-4. Let's make our SelectField compoennt used on the profile screen searchable by passing in the new property.
+4. Let's make our SelectField component used on the profile screen searchable by passing in the new property.
 
 ### Add Search Header to Bottom Sheet Modal
 
@@ -823,7 +823,7 @@ Call `setSearchValue("")` in the following places
 1. `onPress` for the `BottomSheetBackdrop`
 2. Within the `dismissOptions` function before dismissal
 
-Add an onDissmis prop to the `BottomSheetFlatList` that calls the `dismissOptions` function to handle the clear on drag close.
+Add an onDismiss prop to the `BottomSheetFlatList` that calls the `dismissOptions` function to handle the clear on drag close.
 
 #### Dismiss the keyboard when opening the `BottomSheetModal`
 

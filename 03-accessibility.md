@@ -177,6 +177,7 @@ But, the `Text` and `TextInput` controls are announcing their contents and their
   containerStyle={$textField}
   keyboardType="number-pad"
   placeholderTx="demoProfileScreen.yoe"
+```
 
 6. You might have noticed that Bio still doesn't sound very good. Generally screen readers ignore the placeholder text, but it doesn't seem to be in the case of a multi-line text input. [Apparently placeholders aren't great for accessibility, anyway](https://www.w3.org/WAI/tutorials/forms/instructions/#placeholder-text). Let's just get rid of it:
 

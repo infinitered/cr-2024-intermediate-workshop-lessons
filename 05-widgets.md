@@ -2,7 +2,7 @@
 
 ### Goal
 
-Learn how to use config plugins like `react-native-android-widget` and `expo-apple-targets` to extend our app far beyond its screens and icon, creating homescreen widgets that read data from our app.
+Learn how to use config plugins like `react-native-android-widget` and `expo-apple-targets` to extend our app far beyond its screens and icon, creating home screen widgets that read data from our app.
 
 ### Concepts
 
@@ -25,7 +25,7 @@ Learn how to use config plugins like `react-native-android-widget` and `expo-app
 
 In Android, much of what you'll do with widgets will be in TypeScript/JSX. It'll fit neatly within your `src` folder.
 
-On iOS, there's some Swift UI, some JSON, some Expo Modules API stuff, a little TypeScript... phew! Some of it can go whereever, but some of it needs to go in specific places in your project. So, we're going to try our best, keeping widget-related TS in a **src/widgets** folder, and putting the rest where it needs to go.
+On iOS, there's some Swift UI, some JSON, some Expo Modules API stuff, a little TypeScript... phew! Some of it can go wherever, but some of it needs to go in specific places in your project. So, we're going to try our best, keeping widget-related TS in a **src/widgets** folder, and putting the rest where it needs to go.
 
 1. Create the **src/widgets** folder. Cross-platform code will go in the root here.
 2. Create the **src/widgets/android** folder. Android-platform-specific TS will go in the root here. There will be a lot of this.
