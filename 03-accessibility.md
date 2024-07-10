@@ -91,7 +91,7 @@ Common gestures:
 - Swipe left: go to previous control
 - Single tap: focus control
 - Double tap: select / interact with control
-- ???: Go to home screen
+- Swipe up, swipe left in one gesture: Go to home screen
 
 > Use `npx expo run:android --device` to build the app to your USB-connected device.
 
@@ -126,7 +126,7 @@ First things, first - what are we even focused on. Let's use simple `accessibili
 
 ```tsx
 <Text
-  preset="heading"
+  preset="bold"
   text="Enter your developer profile to let us know what you'd like to work on and what React Native Radio episodes you'd like to hear"
 />
 ```
@@ -168,9 +168,9 @@ But, the `Text` and `TextInput` controls are announcing their contents and their
 
 🏃**Try it.** Back in the Profile tab, just leave off any accessibility labels from the `TextField`'s. See how it sounds.
 
-5. Now, where we think more context is needed, let's add `accessibilityLabel` to selected `TextField`'s. For instance, on years of experience, you could do this:
+4. Now, where we think more context is needed, let's add `accessibilityLabel` to selected `TextField`'s. For instance, on years of experience, you could do this:
 
-````diff
+```diff
 <TextField
 + accessibilityLabel="Years of experience, text input, numeric value"
   labelTx="demoProfileScreen.yoe"
@@ -179,7 +179,7 @@ But, the `Text` and `TextInput` controls are announcing their contents and their
   placeholderTx="demoProfileScreen.yoe"
 ```
 
-6. You might have noticed that Bio still doesn't sound very good. Generally screen readers ignore the placeholder text, but it doesn't seem to be in the case of a multi-line text input. [Apparently placeholders aren't great for accessibility, anyway](https://www.w3.org/WAI/tutorials/forms/instructions/#placeholder-text). Let's just get rid of it:
+5. You might have noticed that Bio still doesn't sound very good. Generally screen readers ignore the placeholder text, but it doesn't seem to be in the case of a multi-line text input. [Apparently placeholders aren't great for accessibility, anyway](https://www.w3.org/WAI/tutorials/forms/instructions/#placeholder-text). Let's just get rid of it:
 
 ```diff
 <TextField
@@ -190,11 +190,11 @@ But, the `Text` and `TextInput` controls are announcing their contents and their
 -  placeholderTx="demoProfileScreen.bio"
   value={bio}
   onChangeText={(text) => setProp("bio", text)}
-````
+```
 
 ### Extra Android features
 
-7. The `TextField`'s sound OK, on Android, but Android has an `accessibilityLabelledBy` prop that can link inputs and their descriptors a little better. Let's adapt to that.
+6. The `TextField`'s sound OK, on Android, but Android has an `accessibilityLabelledBy` prop that can link inputs and their descriptors a little better. Let's adapt to that.
 
 In **TextField.tsx**, let's break out the platform-specific accessibility props into separate objects just before the `return` statement:
 
@@ -233,14 +233,12 @@ import nextId from "react-id-generator";
 
 and also pull in `Platform` from `react-native`.
 
-8. Remove the accessibility props from the label and text input controls, and spread those objects to use whatever accessibility props are in play:
+7. Remove the accessibility props from the label and text input controls, and spread those objects to use whatever accessibility props are in play:
 
 ```diff
 {!!(label || labelTx) && (
   <Text
 -    accessibilityLabel=""
--    accessibilityElementsHidden
--    importantForAccessibility="no-hide-descendants"
 +    {...labelAccessibilityProps}
     preset="formLabel"
     text={label}
