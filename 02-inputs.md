@@ -195,11 +195,11 @@ To fix this, in our `Screen` component update the `KeyboarAvoidingView` behavior
 
 Not that keyboard avoiding isn't great, but it's quite a pain to have to scroll to see the other text fields. On top of that, if you scroll past, or haven't scrolled enough, a user might not even know there's an input to see!
 
-A toolbar with inputs to navigate between text fields and close the keyboard when we're done is a great native feeling solution.
+A toolbar with arrows to navigate between text fields and a clear button to close the keyboard when we're done is a great native feeling solution.
 
 ### Add toolbar to Profile Screen
 
-Since we don't necessarily want a toolbar on every scrolling screen (ie. even the ones without inputs), we can add it directly to our Profile screen.
+Since we don't necessarily want a toolbar on every scrolling screen (ie. even the ones without inputs), let's add it directly to our Profile screen.
 
 In _src/app/(app)/(tabs)/profile.tsx_:
 
@@ -219,8 +219,7 @@ import { KeyboardToolbar } from "react-native-keyboard-controller";
 </>
 ```
 
-> [!IMPORTANT]
-> Verify that this works as expected, with arrows to move between fields and closing the keyboard with the done button instead of simply pressing outside an input or hitting return on the keyboard.
+🏃**Try it.** Verify that this works as expected, with arrows to move between fields and closing the keyboard with the done button instead of simply pressing outside an input or hitting return on the keyboard.
 
 ### Update bottomOffset
 
