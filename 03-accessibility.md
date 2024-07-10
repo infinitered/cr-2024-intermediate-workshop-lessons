@@ -279,17 +279,15 @@ This works great for the looking for a job and remote only toggles. But what abo
 
 Let's implement `accessibilityValue` to override the description of the value:
 
-// TODO: try this for real once this toggle is in place, and then actually test it
-
 ```diff
 <Toggle
-  labelTx="demoProfileScreen.job"
+  labelTx="demoProfileScreen.darkMode"
   variant="switch"
-+  accessibilityRole="togglebutton"
++ accessibilityRole="togglebutton"
 + accessibilityValue={{ text: darkMode ? "On" : "Off"}}
   labelPosition="left"
   containerStyle={$textField}
-  value={openToWork}
+  value={themeContext === "dark"}
 ```
 
 ### Sliders: do their own thing
@@ -331,13 +329,11 @@ Apparently, `accessibilityIncrements` must output strings that can be cast to do
 ```diff
 <Text
 +  accessibilityLabel={Platform.OS === 'ios'? "" : "React Native Familiarity level, set slider below from 0 to 4, 0 being a novice to 4 being a master of React Native."}
-  accessibilityElementsHidden
   preset="formLabel"
   tx="demoProfileScreen.rnFamiliarity"
   style={{ marginBottom: spacing.xs }}
 />
   <Text
-    accessibilityElementsHidden
 +    importantForAccessibility="no-hide-descendants"
     tx={`demoProfileScreen.familiaritySubtitles.${rnFamiliarity}` as TxKeyPath}
     style={$familiaritySubtitle}
@@ -404,7 +400,7 @@ The above announcement would work on Android, as well. But we can try using live
 
 1. Make the above code iOS platform specific with a `Platform.OS === 'ios' ...` conditional.
 
-2. In **TextField.tsx**, co-opt the helper text to act as validation text. If we had more time, we might paint it red, as well:
+2. In **TextField.tsx**, co-opt the helper text to act as validation text:
 
 ```diff
 {!!(helper || helperTx) && (
@@ -425,7 +421,7 @@ Now, it should interrupt with changes.
 3. Back in **profile.tsx**, make a state variable containing name validation text:
 
 ```tsx
-const [nameValidationText, setNameValidationText] = useState<
+const [nameValidationText, setNameValidationText] = React.useState<
   string | undefined
 >(undefined);
 ```
@@ -439,7 +435,8 @@ Update the name text field to pass this to helper:
   placeholderTx="demoProfileScreen.name"
   value={name}
   onChangeText={(text) => setProp("name", text)}
-+  helper={nameValidationText}
++ helper={nameValidationText}
++ status={nameValidationText ? "error" : undefined}
 />
 ```
 
@@ -448,7 +445,7 @@ Update the name text field to pass this to helper:
 ```tsx
 if (Platform.OS === "android") {
   if (name.trim() === "") {
-    setNameValidationText("name is required");
+    setNameValidationText("Name is required");
   } else {
     setNameValidationText(undefined);
   }
