@@ -22,7 +22,7 @@ How much of our developer profile form can we make accessible before lunch?
   - [VoiceOver gestures](https://support.apple.com/guide/iphone/use-voiceover-gestures-iph3e2e2281/ios)
   - [Accessibility Inspector](https://developer.apple.com/documentation/accessibility/accessibility-inspector)
 - Android
-  - ???
+  - [Turn on TalkBack](https://support.google.com/accessibility/android/answer/6007100?sjid=2466709077556310384-NA)
 
 # Philosophy
 
