@@ -831,6 +831,12 @@ When we are focused on a different text input when we click into the `SelectFiel
 
 1. Add `Keyboard.dismiss()` within the `presentOptions` function
 
+#### Skip the `SelectField` input when navigating with arrows
+
+While we technically used a `TextField` component for displaying our selected values when the bottom sheet closes, we don't want users to edit the text there. It's pretty confusing when navigating with the arrows from the `KeyboardToolbar` as well so let's fix it.
+
+1. Update the `TextField` in our `SelectField` component to not be editable
+
 #### Add `KeyboardToolbar` to help with closing keyboard
 
 That toolbar we added to the keyboard to navigate through our form was great so let's add one here as well. We only have one field though so no need for the arrows to jump between inputs, we'll just use the Done button.
