@@ -118,8 +118,8 @@ export function Screen(props: ScreenProps) {
 
 To fix this, let's head into the `ScreenWithScrolling` component (in the same file, just up above) and replace the existing `Scrollview` with a `KeyboardAwareScrollView`. We can keep all the existing props, and see how this helps.
 
-```diff
-+ import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
+```tsx
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 ```
 
 ```diff
@@ -129,6 +129,8 @@ To fix this, let's head into the `ScreenWithScrolling` component (in the same fi
 -    </ScrollView>
 +    </KeyboardAwareScrollView>
 ```
+
+🏃**Try it.** How does it look? Is it perfect? Probably not. What issues are you seeing?
 
 <details><summary>Somewhat Better Keyboard Avoidance</summary>
 <video width=300 src=./files/02/KeyboardAwareScrollView1.mp4 />
@@ -140,20 +142,20 @@ To fix this, let's head into the `ScreenWithScrolling` component (in the same fi
 We're getting somewhere now, but lets add some padding to offset the bottom of the textfields just a little so we don't have any cutoff.
 
 1. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
-2. Destructure that prop in our `ScreenWithScrolling` component, preferrably with a default of 0
+2. Destructure that prop in our `ScreenWithScrolling` component, preferably with a default of 0
 3. Pass `bottomOffset` in to the `KeyboardAwareScrollView`
-4. In _src/app/(app)/(tabs)/profile.tsx_ add `bottomOffset` prop to the `Screen` component.
+4. In _src/app/(app)/(tabs)/profile.tsx_ add a 16px `bottomOffset` prop to the `Screen` component.
 
 ```diff
 <Screen
         preset="scroll"
         contentContainerStyle={$container}
         keyboardShouldPersistTaps="handled"
-        bottomOffset={spacing.md}
++        bottomOffset={spacing.md}
         >
 ```
 
-There we go! The keyboard isn't blocking any of our fields.
+🏃**Try it.** There we go! The keyboard isn't blocking any of our fields.
 
 ### Fix double padding issue on scroll
 
@@ -175,7 +177,7 @@ Reuse the `isNonScrolling` function and add an `enable` prop to the `KeyboardAvo
       >
 ```
 
-Now let's check it again...and no doubled up padding when the keyboard is open!
+🏃**Try it.** Now let's check it again...and no doubled up padding when the keyboard is open!
 
 #### Android Only
 
