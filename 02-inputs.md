@@ -265,7 +265,7 @@ touch ./src/components/SelectField.tsx
 Let's add some preliminary code to the file. Since the `TextField` has its own touch handlers for focus, we'll want to disable that by wrapping it in a `View` with no pointer-events. The new `TouchableOpacity` will trigger our options sheet.
 
 ```tsx
-import React, { forwardRef, Ref, useImperativeHandle } from "react";
+import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { observer } from "mobx-react-lite";
 import { TextField, TextFieldProps } from "./TextField";
@@ -306,12 +306,10 @@ export const SelectField = observer(
 
 3. Add a SelectField to our Profile screen so we can monitor our progress as we build it.
 
-We'll replace the existing skills field on the Profile screen.
-
 In _src/app/(app)/(tabs)/profile.tsx:_
 
 - Add a `SelectField` right below the existing skills `TextField`.
-- Copy over the labelTx to the corresponding `SelectField` prop
+- Copy over the label from the `Text` component into the `labelTx` prop
 
 4. Add New Props and Customize the TextField
 
@@ -321,18 +319,18 @@ Now, we can start modifying the code we added in the previous step to support mu
 
 Let's add an accessory to the input to make it look like a `SelectField`.
 
-```tsx
+```diff
 <TextField
   {...TextFieldProps}
-  RightAccessory={(props) => (
-    <Icon icon="caretRight" containerStyle={props.style} />
-  )}
++ RightAccessory={(props) => (
++   <Icon icon="caretRight" containerStyle={props.style} />
++ )}
 />
 ```
 
 #### Add props
 
-- The options prop can be any structure that you want (e.g. flat array of values, object where the key is the option value and the value is the label, etc). For our `SelectField` guide, we'll be doing an array of objects.
+- The options prop can be any structure that you want (e.g. flat array of values, object where the key is the option value and the value is the label, etc). For our `SelectField` guide, we'll be doing an array of label and value pairs.
 
 - We will support multi-select (by default) as well as a single select.
 
@@ -377,7 +375,7 @@ const valueString =
     .join(", ");
 ```
 
-### Replace SelectField for Skills TextField
+### Update Profile Screen SelectField
 
 Now that we've added a bit to the `SelectField` (ie. our souped up `TextField`) let's add some more data!
 
@@ -434,8 +432,8 @@ const skillsList: {
 <br/>
 
 - Pass our new `skillsList` in for the `options` property
-- Add an `onSelect` prop that takes in `selected` and passes that through the `setProp` action for skills.
 - The value should be set to skills from our `Profile` model.
+- Add an `onSelect` prop that takes in `selected` and passes that through the `setProp` action for skills.
 - Remove the old skill `TextField` and `Text` label above it.
 
 So far your select field should look like this:
@@ -471,6 +469,8 @@ Since we will be using the `BottomSheetModal` component instead of `BottomSheet`
 
 We're going to need our keyboard avoiding behavior in a later step, so make sure to add the provider nested within the existing `KeyboardProvider`.
 
+In **src/app/\_layout.tsx**:
+
 ```tsx
 <KeyboardProvider>
   <BottomSheetModalProvider>
@@ -484,12 +484,7 @@ We're going to need our keyboard avoiding behavior in a later step, so make sure
 Now we will add the UI components that will display our options. This will be a basic example and we'll customize it a bit later.
 
 ```diff
-+import {
-+  BottomSheetBackdrop,
-+  BottomSheetFlatList,
-+  BottomSheetFooter,
-+  BottomSheetModal,
-+} from "@gorhom/bottom-sheet";
++import { BottomSheetBackdrop, BottomSheetFlatList,  BottomSheetFooter,  BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
 import { TouchableOpacity, View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite"
