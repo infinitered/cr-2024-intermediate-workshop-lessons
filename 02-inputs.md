@@ -725,9 +725,11 @@ In _src/components/SelectField.tsx_:
 
 1. Update the `SelectField` component to have an optional boolean property of `searchable`. We'll set the default value to `false`.
 
-2. Add another optional prop to pass in `TextFieldProps` to our search `TextField` for customization
+2. Add another optional prop `SearchFieldProps` of type `TextFieldProps` to pass to our search `TextField` for customization
 
 3. Add a `useState` hook to store and set search values (we'll use these in the next step)
+
+4. Let's make our SelectField compoennt used on the profile screen searchable by passing in the new property.
 
 ### Add Search Header to Bottom Sheet Modal
 
@@ -773,32 +775,18 @@ const $searchClearButton: ViewStyle = {
 };
 ```
 
-This looks a little tight with the 50% snapPoint we have set, why don't we make it full screen if the list is searchable.
+This looks a little tight with the 50% snapPoint we have set, why don't we make it almost full screen if the list is searchable.
 
 2. Update the snapPoints on the `BottomSheetModal` to be dynamic based on our `searchable` boolean
 
 ```diff
 <BottomSheetModal
   ref={sheet}
-+ snapPoints={searchable ? ["100%"] : ["50%"]}
++ snapPoints={searchable ? ["94%"] : ["50%"]}
 />
 ```
 
-3. It's a little close to the top of the view, so let's add some dynamic styling as well
-
-```diff
-+const { bottom, top } = useSafeAreaInsets()
-
-//...
-
-<BottomSheetFlatList
-style={{
-+             marginTop: searchable ? top : undefined,
-              marginBottom: bottom + spacing.xl * 2 + spacing.md,
-            }}
-```
-
-4. We want this header to stay at the top while we scroll, so let's make it sticky
+3. We want this header to stay at the top while we scroll, so let's make it sticky
 
 ```diff
 <BottomSheetFlatList
@@ -830,14 +818,16 @@ You might have noticed a couple oddities in the behavior when navigating through
 
 #### Clear the search when exiting/closing the modal
 
-Call setSearchValue("") in the following places
+Call `setSearchValue("")` in the following places
 
 1. `onPress` for the `BottomSheetBackdrop`
 2. Within the `dismissOptions` function before dismissal
 
+Add an onDissmis prop to the `BottomSheetFlatList` that calls the `dismissOptions` function to handle the clear on drag close.
+
 #### Dismiss the keyboard when opening the `BottomSheetModal`
 
-If we're focused on a different text input when we click into the `SelectField` component, the keyboard stays up over the `BottomSheetModal`. Let's fix that!1
+When we are focused on a different text input when we click into the `SelectField` component, the keyboard stays up over the `BottomSheetModal`. Let's fix that!
 
 1. Add `Keyboard.dismiss()` within the `presentOptions` function
 
@@ -845,14 +835,15 @@ If we're focused on a different text input when we click into the `SelectField` 
 
 That toolbar we added to the keyboard to navigate through our form was great so let's add one here as well. We only have one field though so no need for the arrows to jump between inputs, we'll just use the Done button.
 
-1. Add a `KeyboardToolbar` component in a fragment with our `BottomSheetModal`
+1. Add a `KeyboardToolbar` component within the `BottomSheetModal` component
+2. Hide the arrows!
 
 #### Fix bottom padding when keyboard is open to search
 
 Notice when we focus on the search `TextInput` and scroll to the bottom of our full skills list the bottom is somewhat cut off.
 
 1. Add a useState hook that stores and sets a value paddingBottom for our `BottomSheetFlatList`
-2. In the search `TextField` component, update `onFocus` and `onBlur` and to set and clear the paddingBottom value.
+2. In the search `TextField` component, update `onFocus` and `onBlur` and to set and clear the paddingBottom value (275 is a good number to try).
 3. Add the style in the `contentContainerStyle` on the `BottomSheetFlatList`
 
 🏃**Try it.** Does your profile form look better and behave as you would expect it to? Is the keyboard dismissing as expected and the search behaving how you imagined?
