@@ -243,7 +243,7 @@ And there you have it, keyboard avoidance and moving from field to field without
 
 ## Exercise 3: New dropdown component
 
-For the next exercise we're going to switch gears and improve one of our form fields. The skills input is lacking, especially if you enter more than a couple. A comma separated list just isn't the right type for this data.
+For the next exercise we're going to switch gears and improve one of our form fields. The skills input is mediocre, especially if you type out more than a couple skills. A single text string with a comma separated list just isn't the right type or display for this data.
 
 Instead, let's consider a select field, with a predefined list of skills that a user can select from. We don't have this component yet so lets build it and then update our stores to hold the data as we expect.
 
@@ -302,7 +302,18 @@ export const SelectField = observer(
 );
 ```
 
-2. Add New Props and Customize the TextField
+2. Export the component from _src/components/index.ts_
+
+3. Add a SelectField to our Profile screen so we can monitor our progress as we build it.
+
+We'll replace the existing skills field on the Profile screen.
+
+In _src/app/(app)/(tabs)/profile.tsx:_
+
+- Add a `SelectField` right below the existing skills `TextField`.
+- Copy over the labelTx to the corresponding `SelectField` prop
+
+4. Add New Props and Customize the TextField
 
 Now, we can start modifying the code we added in the previous step to support multiple options as well as making the `TextField` look like a `SelectField`.
 
@@ -368,12 +379,10 @@ const valueString =
 
 ### Replace SelectField for Skills TextField
 
-Now that we've got the `SelectField` (ie.our souped up `TextField`) let's replace the existing skills field on the Profile screen.
+Now that we've added a bit to the `SelectField` (ie. our souped up `TextField`) let's add some more data!
 
 In _src/app/(app)/(tabs)/profile.tsx:_
 
-- Add a `SelectField` right below the existing skills `TextField`.
-- Copy over the labelTx to the corresponding `SelectField` prop
 - We need some data, copy the following into a constant at the top of the file.
 
 <details><summary>Skills List</summary>
