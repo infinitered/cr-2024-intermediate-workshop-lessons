@@ -375,6 +375,8 @@ const valueString =
     .join(", ");
 ```
 
+Update the `TextField` to use this as the displayed value.
+
 ### Update Profile Screen SelectField
 
 Now that we've added a bit to the `SelectField` (ie. our souped up `TextField`) let's add some more data!
@@ -469,14 +471,18 @@ Since we will be using the `BottomSheetModal` component instead of `BottomSheet`
 
 We're going to need our keyboard avoiding behavior in a later step, so make sure to add the provider nested within the existing `KeyboardProvider`.
 
+We also need to wrap everything in `ReactNativeGestureHandler` so let's do that as well.
+
 In **src/app/\_layout.tsx**:
 
 ```tsx
-<KeyboardProvider>
-  <BottomSheetModalProvider>
-    <Slot />
-  </BottomSheetModalProvider>
-</KeyboardProvider>
+<ReactNativeGestureHandler>
+  <KeyboardProvider>
+    <BottomSheetModalProvider>
+      <Slot />
+    </BottomSheetModalProvider>
+  </KeyboardProvider>
+</ReactNativeGestureHandler>
 ```
 
 #### Add the Necessary Components to `SelectField`
@@ -680,7 +686,7 @@ labelTx="demoProfileScreen.skills"
 onSelect={(selected) => setProp("skills", selected)}
 value={skills}
 renderValue={(value) => t("demoProfileScreen.skillsSelected", { count: value.length })}
-containerStyle={$textField}
++containerStyle={$textField}
 />
 ```
 
@@ -692,7 +698,7 @@ options={skillsList}
 labelTx="demoProfileScreen.skills"
 onSelect={(selected) => setProp("skills", selected)}
 value={skills}
-+renderValue={(value) => t("demoProfileScreen.skillsSelected", { count: value.length })}
++renderValue={(value) => translate("demoProfileScreen.skillsSelected", { count: value.length })}
 />
 ```
 
@@ -706,6 +712,8 @@ skillsSelected: {
 ```
 
 Looks good now! Try selecting, 0, 1, and many options to see it update accordingly.
+
+4. The list of skills is hard to read through, let's sort it so that our list is alphabetical.
 
 ## Exercise 4: Full text search in the dropdown
 
