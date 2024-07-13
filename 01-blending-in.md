@@ -3079,6 +3079,10 @@ const $emptyStateImage: ImageStyle = {
 }
 ```
 
+You'll notice a bunch of the styles became functions of the theme. Many of them are just spacing, which might not be too noticeable. The reason for that is due to the contents of `src/theme/spacingDark.ts`. The values here are the same as the light theme.
+
+Open up `src/theme.spacingDark.ts` and play with some of the spacing values and toggle your dark theme to see your views adjust!
+
 ## Side Quests
 
 - Update the rest of the components
