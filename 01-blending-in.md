@@ -58,6 +58,12 @@ Android:
 3. Font Size
 4. Drag slider to the largest setting
 
+### Open the app and take it for a spin
+
+Open up the app after changing the settings. How well can you navigate around? Log in (if not already), scroll down on the lists, switch tabs.
+
+You should notice some obvious challenges just tapping around the app. Let's continue on and learn how we can fix some of these font scaling issues.
+
 ### Fix the Log In screen
 
 Notice how we now have to scroll for the sign in button. It's not the worst thing, but it's an example of how to proceed may not be apparent to the user.
