@@ -151,7 +151,7 @@ struct EpisodeFromStore: Codable {
 func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
   // Notice the App Group is used here
   let userDefaults = UserDefaults(suiteName: "group.cr2024im.data")
-  // And the key for the data that we use in the Zustand store.
+  // And the key for the data that we use in the MST store.
   let episodesJsonString = userDefaults?.string(forKey: "episodes") ?? "[]"
 
   let decoded: [EpisodeFromStore] = try! JSONDecoder().decode([EpisodeFromStore].self, from: Data(episodesJsonString.utf8))
@@ -227,7 +227,7 @@ This open also allows you to add debugging breakpoints to the widget code.
 
 Let's add the thumbnail image and extra favorite podcast badge to finish making this widget look presentable.
 
-### Downlaoding and displaying the image
+### Downloading and displaying the image
 
 SwiftUI has a nice `AsyncImage` component that could take a URL and download an image, but... it doesn't work in widgets! Everything has to be synchronous, so the image needs to be downloaded first in `getTimeline`.
 
@@ -332,16 +332,16 @@ There's some large padding around the widget content that you didn't intend to b
 5. Update `FavoriteEpisodeWidget` with this to limit the sizes and fix the margins:
 
 ```diff
-struct FavoriteEpisideWidget: Widget {
-  let kind: String = "HelloWidget"
+struct FavoriteEpisodeWidget: Widget {
+  let kind: String = "FavoriteEpisodeWidget"
 
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: Provider()) { entry in
       if #available(iOS 17.0, *) {
-        HelloWidgetEntryView(entry: entry)
+        FavoriteEpisodeWidgetEntryView(entry: entry)
           .containerBackground(.fill.tertiary, for: .widget)
       } else {
-        HelloWidgetEntryView(entry: entry)
+        FavoriteEpisodeWidgetEntryView(entry: entry)
           .padding()
           .background()
       }
@@ -354,7 +354,7 @@ struct FavoriteEpisideWidget: Widget {
 }
 ```
 
-🏃**Try it.** Hopefully medium looks pretty good now! Small will still be squished. Large should dissappear if you added it to your home screen.
+🏃**Try it.** Hopefully medium looks pretty good now! Small will still be squished. Large should disappear if you added it to your home screen.
 
 6. We need to break out the widget SwiftUI into multiple sizes. A good way to do this is to provide separate components for each size. This will be a big copy/paste chunk, mostly because this isn't a SwiftUI workshop and we don't want to spend a lot of time fiddling with this. Replace `FavoriteEpisodeWidgetEntryView` with this:
 
@@ -411,7 +411,7 @@ struct WidgetMediumView : View {
   }
 }
 
-struct HelloWidgetEntryView : View {
+struct FavoriteEpisodeWidgetEntryView : View {
   var entry: Provider.Entry
 
   @Environment(\.widgetFamily) var family: WidgetFamily
@@ -444,7 +444,7 @@ if (entry.episodeCount > 1) {
   VStack {
     HStack {
       ZStack {
-        Circle().fill(Color.red) // TODO: make it IR rgba(213, 70, 63, 1)
+        Circle().fill(Color(red: 213 / 255, green: 70 / 255, blue: 63 / 255, opacity: 1))
           .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
         Text("+\((entry.episodeCount - 1).description)")
       }.frame(width: 60, height: 60)
@@ -486,7 +486,7 @@ Since we only show one podcast at once, we can't really let the user select from
 Update `FavoriteEpisodePodcastEntryView` to link to the respective deep links for each widget size:
 
 ```diff
-struct HelloWidgetEntryView : View {
+struct FavoriteEpisodePodcastEntryView : View {
   var entry: Provider.Entry
 
   @Environment(\.widgetFamily) var family: WidgetFamily
