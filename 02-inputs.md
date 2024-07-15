@@ -110,12 +110,6 @@ export function Screen(props: ScreenProps) {
 > [!NOTE]
 > This works great for some views, keeping floating buttons at the bottom of a view when the keyboard is open for example, but has trouble managing on views with scrolling so we need another solution.
 
-<details><summary>Bad Keyboard Avoidance Demo</summary>
-<video width=300 src=./files/02/KeyboardAvoidingViewFail.mp4 />
-</details>
-
-<br/>
-
 To fix this, let's head into the `ScreenWithScrolling` component (in the same file, just up above) and replace the existing `Scrollview` with a `KeyboardAwareScrollView`. We can keep all the existing props, and see how this helps.
 
 ```tsx
@@ -131,11 +125,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 ```
 
 🏃**Try it.** How does it look? Is it perfect? Probably not. What issues are you seeing?
-
-<details><summary>Somewhat Better Keyboard Avoidance</summary>
-<video width=300 src=./files/02/KeyboardAwareScrollView1.mp4 />
-</details>
-<br/>
 
 ### Pad for extra viewing comfort
 
