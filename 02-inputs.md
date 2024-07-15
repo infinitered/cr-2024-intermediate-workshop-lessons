@@ -149,7 +149,7 @@ We're getting somewhere now, but let's add some padding to offset the bottom of 
 3. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
 4. Destructure that prop in our `ScreenWithScrolling` component, preferably with a default of 0
 5. Pass `bottomOffset` in to the `KeyboardAwareScrollView`
-6. In _src/app/(app)/(tabs)/profile.tsx_ add a 16px `bottomOffset` prop to the `Screen` component.
+6. In **src/app/(app)/(tabs)/profile.tsx** add a 16px `bottomOffset` prop to the `Screen` component.
 
 ```diff
 <Screen
@@ -206,7 +206,7 @@ A toolbar with arrows to navigate between text fields and a clear button to clos
 
 Since we don't necessarily want a toolbar on every scrolling screen (ie. even the ones without inputs), let's add it directly to our Profile screen.
 
-In _src/app/(app)/(tabs)/profile.tsx_:
+In **src/app/(app)/(tabs)/profile.tsx**:
 
 1. Wrap the `Screen` component in a fragment
 2. Import `KeyboardToolbar` from `react-native-keyboard-controller`
@@ -307,11 +307,11 @@ export const SelectField = observer(
 );
 ```
 
-2. Export the component from _src/components/index.ts_
+2. Export the component from **src/components/index.ts**
 
 3. Add a SelectField to our Profile screen so we can monitor our progress as we build it.
 
-In _src/app/(app)/(tabs)/profile.tsx:_
+In **src/app/(app)/(tabs)/profile.tsx**:
 
 - Add a `SelectField` right below the existing skills `TextField`.
 - Copy over the label from the `Text` component into the `labelTx` prop
@@ -386,7 +386,7 @@ const valueString =
 
 Now that we've added a bit to the `SelectField` (ie. our souped up `TextField`) let's add some more data!
 
-In _src/app/(app)/(tabs)/profile.tsx:_
+In **src/app/(app)/(tabs)/profile.tsx**:
 
 6. We need some data, copy the following into a constant at the top of the file.
 
@@ -456,7 +456,7 @@ So far your select field should look like this:
 
 But now our `Profile` model is out of sync with the data we are providing it. Let's go update that!
 
-In _src/models/Profile.ts_:
+In **src/models/Profile.ts**:
 
 11. Update the `skills` prop to be an optional array of strings
 
@@ -838,7 +838,7 @@ At this point it looks great, but notice when you select a large number of optio
 
 Let's update that to display the number of skills selected instead of listing them by passing in a custom `renderValue` prop
 
-Back in _src/app/(app)/(tabs)/profile.tsx_:
+Back in **src/app/(app)/(tabs)/profile.tsx**:
 
 8. The search field is a little close to its neighbors, so let's add the existing style we're using on the other inputs as well.
 
@@ -882,7 +882,7 @@ Looks good now! Try selecting, 0, 1, and many options to see it update according
 
 For our last piece of our form, we're going to update our `SelectField` a little more and make it easier for users to find certain skills with a search bar!
 
-In _src/components/SelectField.tsx_:
+In **src/components/SelectField.tsx**:
 
 ### Set Up for Searchability
 
