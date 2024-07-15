@@ -41,7 +41,7 @@ Let's explore an aspect of font scaling to help alleviate these pains.
 
 ### Device settings prep
 
-Turn on larger text sizes
+Turn on larger text sizes with the instructions below. The steps may vary by OS version or manufacturer (such as Samsung versus Google if using an Android device).
 
 iOS:
 
@@ -58,9 +58,7 @@ Android:
 3. Font Size
 4. Drag slider to the largest setting
 
-### Open the app and take it for a spin
-
-Open up the app after changing the settings. How well can you navigate around? Log in (if not already), scroll down on the lists, switch tabs.
+🏃**Try it.** Open up the app after changing the settings. How well can you navigate around? Log in (if not already), scroll down on the lists, switch tabs.
 
 You should notice some obvious challenges just tapping around the app. Let's continue on and learn how we can fix some of these font scaling issues.
 
@@ -83,7 +81,9 @@ With these changes, the input labels, inputs and button text are all larger - ai
 
 Sometimes, the user will have larger accessibility sizes (or a zoom) enabled. If you noticed on iOS, you have the ability in the Settings app to unlock some larger text sizes. Change the `Larger Accessibility Sizes` toggle and again drag the slider further to the right.
 
-Flip back to the application and you'll notice the screen has changed again! This time, we'll use the `maxFontSizeMultiplier` prop to the screen under control. Try the following:
+🏃**Try it.** Flip back to the application and you'll notice the screen has changed again (for the worse, of course, just developer life things)!
+
+We'll fix it but this time we'll use the `maxFontSizeMultiplier` prop to the screen under control. Try the following:
 
 1. Apply `maxFontSizeMultiplier` to the `<TextField />` labels via `LabelTextProps={{ maxFontSizeMultiplier: 2 }}`
 
@@ -99,9 +99,11 @@ Feel free to restore your device settings before moving on to the next exercise.
 
 Often you'll build an experience and it functions great. Sometimes though, it can feel a little flat. Haptics is a great way to add an extra dimension pretty easily, giving the user some physical feedback as they experience your application.
 
-First, let's provide some feedback if the user submits incorrect credentials. For the ease of testing this, from `log-in` route, backspace until you have an invalid email address format (e.g., leave off the domain) and submit the form.
+First, let's provide some feedback if the user submits incorrect credentials.
 
-You'll notice the only feedback is the helper text in red. Let's iterate on that feedback to enhance it with haptic feedback.
+🏃**Try it.** For the ease of testing this, from `log-in` route, backspace until you have an invalid email address format (e.g., leave off the domain) and submit the form.
+
+You'll notice the only feedback is the helper text in red. It's something, but feels lacking. Let's iterate on that feedback to enhance it with haptic feedback.
 
 `src/app/log-in.tsx`
 
@@ -120,6 +122,8 @@ You'll notice the only feedback is the helper text in red. Let's iterate on that
 
 Pretty simple stuff, but now you'll get a nice buzz when the form bounces back with an issue.
 
+🏃**Try it.** Submit an invalid email again and actually feel the feedback this time. Play with the intensity as well via `ImpactFeedbackStyle`.
+
 Another example of where we could add this feedback is on certain controls, such as the Slider found at the `/profile` route. Add some feedback when the user drags the slider to each value:
 
 `src/app/(app)/(tabs)/profile.tsx`
@@ -137,7 +141,9 @@ Another example of where we could add this feedback is on certain controls, such
 + }}
 ```
 
-Feel the difference?
+🏃**Try it.** Change the slider values around. Feel the difference?
+
+Simple, but effective.
 
 ## Exercise 3: Start building our themeable component library
 
@@ -146,6 +152,8 @@ Adding dark mode to your application has its benefits - reduced eye strain, impr
 Let's build out a theming system in the application, which can be used not only for dark mode but your own custom themes if desired (think seasonal themes with custom color palettes for example).
 
 ### Color Palette
+
+First, we'll need another color palette entirely for this dark theme. When the theme is active, these are the color values your components and screens will use, as opposed to the light theme (currently the only set of colors).
 
 Create `src/theme/colorsDark.ts` with the following values (or come up with your own color scheme!):
 
@@ -202,7 +210,9 @@ export const colors = {
 } as const;
 ```
 
-Also create `src/theme/spacingDark.ts` with the following values (again, feel free to mimic the same values as light mode or come up with your own dark mode spacing values):
+Spacing is a first class citizen in Ignite - `src/thee/spacing.ts` has a set of values so your padding, margin and gap values can all be consistent throughout the application. We can consider these values part of the theme like we do colors, this way if you did want separate spacing for a particular theme, you can achieve that.
+
+Create `src/theme/spacingDark.ts` with the following values (again, feel free to mimic the same values as light mode or come up with your own dark mode spacing values):
 
 ```tsx
 /**
@@ -225,7 +235,9 @@ export type Spacing = keyof typeof spacing;
 
 #### Theme Types and Helpers
 
-Update `src/theme/index.ts` to support both light and dark theme configurations and some helper functions to use later in our styling implementation:
+Update `src/theme/index.ts` to support both light and dark theme configurations and some helper functions to use later in our styling implementation.
+
+1. First we'll create the type definitions:
 
 ```tsx
 import type { StyleProp } from "react-native";
@@ -248,7 +260,13 @@ export type Spacing = typeof spacingLight | typeof spacingDark;
 // These two are consistent across themes.
 export type Timing = typeof timing;
 export type Typography = typeof typography;
+```
 
+Here we have the idea of `ThemeContexts`, which in this case will be `light` or `dark` and we'll reserve `undefined` to reference the system theme.
+
+2. Next we'll create the structure of a `Theme` itself, which consists of colors, spacing, typography and timing values.
+
+```tsx
 // The overall Theme object should contain all of the data you need to style your app.
 export interface Theme {
   colors: Colors;
@@ -270,7 +288,11 @@ export const darkTheme: Theme = {
   typography,
   timing,
 };
+```
 
+3. A few helper types that will translate a more primitive React Native style type such as `ViewStyle` into a `ThemedStyle`. Basically, given our current theme objects (colors, spacing, etc), here is what my `ViewStyle` will look like:
+
+```tsx
 /**
  * Represents a function that returns a styled component based on the provided theme.
  * @template T The type of the style.
@@ -296,7 +318,11 @@ export type ThemedStyleArray<T> = (
   | StyleProp<T>
   | (StyleProp<T> | ThemedStyle<T>)[]
 )[];
+```
 
+4. And finally export all these so they're available for use within our project.
+
+```tsx
 // Export the two Theme objects:
 export {
   colorsLight as colors,
@@ -309,7 +335,7 @@ export {
 export { customFontsToLoad } from "./typography";
 ```
 
-Note the export here for `colorsLight` and `spacingLight`. We're exporting them as the original `colors` and `spacing` so that the app doesn't just red box everywhere (since they're currently in use, remember we're applying this to an existing application).
+Note the export here for `colorsLight` and `spacingLight`. We're exporting them as the original `colors` and `spacing` so that the app doesn't just red box everywhere (since they're currently in use, remember, we're applying this to an existing application).
 
 Exporting like this will allow for us to continue using our application even if we haven't finished theming all of the components and routes yet. We can gradually make the changes over time, which is a nicer developer experience.
 
@@ -319,7 +345,7 @@ Next we'll create the context provider which will give the application access to
 
 #### ThemeContext
 
-Create `src/utils/useAppTheme.ts` and start with the context:
+1. Create `src/utils/useAppTheme.ts` and start with the context provider. It will just be a type to keep the `themeScheme` (type of `ThemeContexts`) and the setter function to change this value.
 
 ```tsx
 import {
@@ -356,7 +382,15 @@ export const ThemeContext = createContext<ThemeContextType>({
     Alert.alert("setThemeContextOverride not implemented");
   },
 });
+```
 
+2. Create the `useThemeProvider` hook. This will be used in one of our more top level `_layout.tsx` files just like any other provider with some type of global state.
+
+This way the entire application will have access to them current theme value stored in the context.
+
+It will return the Context Provider, the setter function and the current theme value.
+
+```tsx
 export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
   const colorScheme = useColorScheme();
   const [overrideTheme, setTheme] = useState<ThemeContexts>(initialTheme);
@@ -381,7 +415,9 @@ This Context Provider will keep track of the theme in use. It defaults to `overr
 
 #### The Hook
 
-In the same file, `src/utils/useAppTheme.ts`, add the hook:
+In the same file, `src/utils/useAppTheme.ts`, add the hook.
+
+1. Let's start with the interface for the value being returned by the hook. It will return an object
 
 ```tsx
 interface UseAppThemeValue {
@@ -398,7 +434,13 @@ interface UseAppThemeValue {
     styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>
   ) => T;
 }
+```
 
+2. Implement the `useAppTheme` hook that can be leveraged in your components throughout the application.
+
+Two of the more important properties returned here are the `theme` and the callback `themed` - which will be used to wrap any `ThemeStyle<T>` object before passing it into a component's `style property`
+
+```tsx
 /**
  * Custom hook that provides the app theme and utility functions for theming.
  *
@@ -456,7 +498,7 @@ export const useAppTheme = (): UseAppThemeValue => {
 };
 ```
 
-We're now ready to apply the theme to our existing components and screens!
+All the set up is just about there to start seeing our theming in action. We're now ready to apply the theme to our existing components and screens!
 
 #### Applying the Theme
 
@@ -542,6 +584,10 @@ const toggleTheme = React.useCallback(() => {
 ```
 
 Now the theme value is being updated when the user switches their selection. It is also persisted to the MST store, so we can initialize the proper value when the app is restarted.
+
+🏃**Try it.** Navigate to the profile tab and toggle your dark mode selection. Refresh the app and see that it sticks!
+
+Notice, nothing magically changes, we'll implement that magic next! :magic_wand:
 
 #### Update the component library
 
@@ -704,7 +750,7 @@ function $textStyle({
 
 <br />
 
-Now that you've styled the `<Button />` component, toggle the theme back and forth from the `profile` route. Observe the button text changes from dark to light and the background from light to dark.
+🏃**Try it.** Now that you've styled the `<Button />` component, toggle the theme back and forth from the `profile` route. Observe the button text changes from dark to light and the background from light to dark.
 
 You're on your way now! Complete the rest of the necessary components for the `podcast` screen. You'll see that as you tackle these components, the rest of the app will begin changing as an added bonus!
 
@@ -2577,45 +2623,23 @@ const $label: TextStyle = {
 ```
 
 </details>
+<br />
+
+🏃**Try it.** Toggle the theme back and forth again while checking out the Podcasts route (honestly, any part of the app since we're working on our component library). You'll see we're not quite there yet, but making good progress!
 
 #### Finally, update the Podcasts route
 
+Ok, the final push to getting our Podcasts route styled for dark theme! Still hanging in? 😅
+
+Now that we've set up the context provider and restyled the necessary component primitives we utilize on our screen, we have one task left to accomplish our goal. Within the Podcasts screen itself, we have to also update any styles with colors and spacing from the active theme and apply any `themed` helpers where necessary.
+
+More of the same, just in a different spot - you got this! If you get stuck along the way, the final solution can be found in `files/01/app/(app)/(tabs)/podcasts/index.tsx`.
+
 Update the Podcasts screen for dynamic theming in `src/app/(app)/(tabs)/podcasts/index.tsx`:
 
+1. First, tackle the `DemoPodcastListScreen` component
+
 ```diff
-import { observer } from "mobx-react-lite"
-import React, { ComponentType, FC, useEffect, useMemo } from "react"
-import {
-  AccessibilityProps,
-  ActivityIndicator,
-  Image,
-  ImageSourcePropType,
-  ImageStyle,
-  Platform,
-  StyleSheet,
-  TextStyle,
-  View,
-  ViewStyle,
-} from "react-native"
-import { type ContentStyle } from "@shopify/flash-list"
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated"
-import {
-  Button,
-  ButtonAccessoryProps,
-  Card,
-  EmptyState,
-  Icon,
-  ListView,
-  Screen,
-  Text,
-  Toggle,
-} from "src/components"
 import { isRTL, translate } from "src/i18n"
 import { useStores } from "src/models"
 import { Episode } from "src/models/Episode"
@@ -2624,12 +2648,7 @@ import { delay } from "src/utils/delay"
 +import { useAppTheme } from "src/utils/useAppTheme"
 import { Link } from "expo-router"
 
-const ICON_SIZE = 14
-
-const rnrImage1 = require("assets/images/demo/rnr-image-1.png")
-const rnrImage2 = require("assets/images/demo/rnr-image-2.png")
-const rnrImage3 = require("assets/images/demo/rnr-image-3.png")
-const rnrImages = [rnrImage1, rnrImage2, rnrImage3]
+// ...
 
 export default observer(function DemoPodcastListScreen(_props) {
   const { episodeStore } = useStores()
@@ -2718,7 +2737,11 @@ export default observer(function DemoPodcastListScreen(_props) {
     </Screen>
   )
 })
+```
 
+2. Now for the `EpisodeCard` child component (same file)
+
+```diff
 const EpisodeCard = observer(function EpisodeCard({
   episode,
   isFavorite,
@@ -2739,60 +2762,7 @@ const EpisodeCard = observer(function EpisodeCard({
     return rnrImages[Math.floor(Math.random() * rnrImages.length)]
   }, [])
 
-  // Grey heart
-  const animatedLikeButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          scale: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.EXTEND),
-        },
-      ],
-      opacity: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.CLAMP),
-    }
-  })
-
-  // Pink heart
-  const animatedUnlikeButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          scale: liked.value,
-        },
-      ],
-      opacity: liked.value,
-    }
-  })
-
-  /**
-   * Android has a "longpress" accessibility action. iOS does not, so we just have to use a hint.
-   * @see https://reactnative.dev/docs/accessibility#accessibilityactions
-   */
-  const accessibilityHintProps = useMemo(
-    () =>
-      Platform.select<AccessibilityProps>({
-        ios: {
-          accessibilityLabel: episode.title,
-          accessibilityHint: translate("demoPodcastListScreen.accessibility.cardHint", {
-            action: isFavorite ? "unfavorite" : "favorite",
-          }),
-        },
-        android: {
-          accessibilityLabel: episode.title,
-          accessibilityActions: [
-            {
-              name: "longpress",
-              label: translate("demoPodcastListScreen.accessibility.favoriteAction"),
-            },
-          ],
-          onAccessibilityAction: ({ nativeEvent }) => {
-            if (nativeEvent.actionName === "longpress") {
-              handlePressFavorite()
-            }
-          },
-        },
-      }),
-    [episode, isFavorite],
-  )
+  // ... some animation and accessibility code ...
 
   const handlePressFavorite = () => {
     onPressFavorite()
@@ -2881,7 +2851,11 @@ const EpisodeCard = observer(function EpisodeCard({
     </Link>
   )
 })
+```
 
+3. Now just touch up the styles
+
+```diff
 const $screenContentContainer: ViewStyle = {
   flex: 1,
 }
@@ -2965,7 +2939,9 @@ const $emptyStateImage: ImageStyle = {
 
 You'll notice a bunch of the styles became functions of the theme. Many of them are just spacing, which might not be too noticeable. The reason for that is due to the contents of `src/theme/spacingDark.ts`. The values here are the same as the light theme.
 
-Open up `src/theme.spacingDark.ts` and play with some of the spacing values and toggle your dark theme to see your views adjust!
+🏃**Try it.** Open up `src/theme.spacingDark.ts` and play with some of the spacing values and toggle your dark theme to see your views adjust!
+
+Congrats! ✨ You've made it (for this screen, with this set of components, at least - hah!). You're now fully capable on telling your boss why the task _"just add dark mode"_ isn't a half day task.
 
 ## Side Quests
 
