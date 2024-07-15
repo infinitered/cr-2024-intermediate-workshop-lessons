@@ -494,31 +494,35 @@ In **src/app/\_layout.tsx**:
 
 Now we will add the UI components that will display our options. This will be a basic example and we'll customize it a bit later.
 
+Update the imports:
+
 ```diff
-+import { BottomSheetBackdrop, BottomSheetFlatList,  BottomSheetFooter,  BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
 import { TouchableOpacity, View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite"
+import { Icon } from "./Icon";
+import { TextField, TextFieldProps } from "./TextField";
++import { BottomSheetBackdrop, BottomSheetFlatList,  BottomSheetFooter,  BottomSheetModal } from "@gorhom/bottom-sheet";
 +import { useSafeAreaInsets } from "react-native-safe-area-context";
 +import { spacing } from "../theme";
 +import { Button } from "./Button";
-import { Icon } from "./Icon";
 +import { ListItem } from "./ListItem";
-import { TextField, TextFieldProps } from "./TextField";
+```
 
-export interface SelectFieldProps
-  extends Omit<TextFieldProps, "ref" | "onValueChange" | "onChange" | "value"> {
-  value?: string[];
-  renderValue?: (value: string[]) => string;
-  onSelect?: (newValue: string[]) => void;
-  multiple?: boolean;
-  options: { label: string; value: string }[];
-}
+Update the SelectFieldRef interface:
+
+```diff
 export interface SelectFieldRef {
 +  presentOptions: () => void;
 +  dismissOptions: () => void;
 }
+```
 
+Add the BottomSheetModal below our display `TextField`:
+
+(We know this is a doozy of a diff, the full file is available to copy at the end of this section)
+
+```diff
 export const SelectField = observer(forwardRef(function SelectField(
   props: SelectFieldProps,
   ref: Ref<SelectFieldRef>
@@ -619,6 +623,11 @@ export const SelectField = observer(forwardRef(function SelectField(
     </>
   );
 }))
+```
+
+Add the styling:
+
+```diff
 
 +const $bottomSheetFooter: ViewStyle = {
 +  paddingHorizontal: spacing.lg,
@@ -629,6 +638,151 @@ export const SelectField = observer(forwardRef(function SelectField(
 +  paddingHorizontal: spacing.lg,
 +};
 ```
+
+<details><summary>Full SelectField.tsx File</summary>
+
+```tsx
+import {
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+  BottomSheetFooter,
+  BottomSheetModal,
+} from "@gorhom/bottom-sheet";
+import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
+import { TouchableOpacity, View, ViewStyle } from "react-native";
+import { observer } from "mobx-react-lite";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { spacing } from "../theme";
+import { Button } from "./Button";
+import { Icon } from "./Icon";
+import { ListItem } from "./ListItem";
+import { TextField, TextFieldProps } from "./TextField";
+
+export interface SelectFieldProps
+  extends Omit<TextFieldProps, "ref" | "onValueChange" | "onChange" | "value"> {
+  value?: string[];
+  renderValue?: (value: string[]) => string;
+  onSelect?: (newValue: string[]) => void;
+  multiple?: boolean;
+  options: { label: string; value: string }[];
+}
+export interface SelectFieldRef {
+  presentOptions: () => void;
+  dismissOptions: () => void;
+}
+
+export const SelectField = observer(
+  forwardRef(function SelectField(
+    props: SelectFieldProps,
+    ref: Ref<SelectFieldRef>
+  ) {
+    const {
+      value = [],
+      onSelect,
+      renderValue,
+      options = [],
+      multiple = true,
+      ...TextFieldProps
+    } = props;
+    const sheet = useRef<BottomSheetModal>(null);
+    const { bottom } = useSafeAreaInsets();
+
+    const disabled =
+      TextFieldProps.editable === false || TextFieldProps.status === "disabled";
+
+    useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }));
+
+    const valueString =
+      renderValue?.(value) ??
+      value
+        .map((v) => options.find((o) => o.value === v)?.label)
+        .filter(Boolean)
+        .join(", ");
+
+    function presentOptions() {
+      if (disabled) return;
+      sheet.current?.present();
+    }
+
+    function dismissOptions() {
+      sheet.current?.dismiss();
+    }
+
+    return (
+      <>
+        <TouchableOpacity activeOpacity={1} onPress={presentOptions}>
+          <View pointerEvents="none">
+            <TextField
+              {...TextFieldProps}
+              value={valueString}
+              RightAccessory={(props) => (
+                <Icon icon="caretRight" containerStyle={props.style} />
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <BottomSheetModal
+          ref={sheet}
+          snapPoints={["50%"]}
+          stackBehavior="replace"
+          enableDismissOnClose
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+            />
+          )}
+          footerComponent={
+            !multiple
+              ? undefined
+              : (props) => (
+                  <BottomSheetFooter
+                    {...props}
+                    style={$bottomSheetFooter}
+                    bottomInset={bottom}
+                  >
+                    <Button
+                      text="Dismiss"
+                      preset="reversed"
+                      onPress={dismissOptions}
+                    />
+                  </BottomSheetFooter>
+                )
+          }
+        >
+          <BottomSheetFlatList
+            style={{ marginBottom: bottom + (multiple ? spacing.xl * 2 : 0) }}
+            data={options}
+            keyExtractor={(o) => o.value}
+            renderItem={({ item, index }) => (
+              <ListItem
+                text={item.label}
+                topSeparator={index !== 0}
+                style={$listItem}
+              />
+            )}
+            keyboardShouldPersistTaps="always"
+          />
+        </BottomSheetModal>
+      </>
+    );
+  })
+);
+
+const $bottomSheetFooter: ViewStyle = {
+  paddingHorizontal: spacing.lg,
+  paddingBottom: spacing.xs,
+};
+
+const $listItem: ViewStyle = {
+  paddingHorizontal: spacing.lg,
+};
+```
+
+</details>
+<br/>
 
 #### Add Selected State to Options and Hook Up Callback
 
