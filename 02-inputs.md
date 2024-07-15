@@ -39,9 +39,25 @@ Maybe we could still save/persist the data instantly in MST, but the Submit butt
 
 # Exercises
 
-## Exercise 1: Basic keyboard avoidance with `react-native-keyboard-controller`
+## Exercise 0: Poke Around A Little
 
-Let's start by ensuring we can always see our input fields on the profile screen, especially when the keyboard is engaged. With the app running, give the profile screen a scroll and try switching between inputs. Is the keyboard in the way? Let's fix that.
+In the next 4 exercises we're going to be updating our profile form so that it's easier to use. Let's start by testing out the current behavior and try to identify what's not working. Poke around in the code a little. Try filling out the form on your simulator or device.
+
+What is already implemented to make the form more user friendly? What could be improved?
+
+Here are some things to get your mind going:
+
+- Are the different types of inputs clear?
+- Can we access / see the text fields when we're typing?
+- How easy is it to get from input to input?
+- Does the type of input suit the data it's asking for?
+- What happens when I try to close the keyboard?
+
+</br>
+
+The existing `KeyboardAvoidingView` doesn't seem to be doing much when we go to use the text inputs. Let's get started fixing that behavior in our first exercise!
+
+## Exercise 1: Basic keyboard avoidance with `react-native-keyboard-controller`
 
 ### Add Keyboard Provider
 
