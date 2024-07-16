@@ -223,6 +223,13 @@ plugins: [
 
 2. Those icons aren't actually in your project yet, so grab them from [the Module 04 files](/files/04/) and copy them into **assets/icons**.
 
+on macOS or Linux:
+
+```
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/04/adaptive-icon-podcast.png > assets/icons/adaptive-icon-podcast.png
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/04/adaptive-icon-profile.png > assets/icons/adaptive-icon-profile.png
+```
+
 3. Run `npx expo prebuild --clean --platform android` to regenerate the Android native project.
 
 4. Run `npx expo run:android` to build the app.
