@@ -4,7 +4,7 @@ Workshop exercises for the Chain React 2024 Intermediate Workshop.
 
 ## How to use this repo
 
-1. Clone the [companion repo](https://github.com/infinitered/cr-2024-intermediate-workshop-template). You'll start working right on `main`.
+1. Fork the [companion repo](https://github.com/infinitered/cr-2024-intermediate-workshop-template). You'll start working right on `main`.
 2. Start at the first module by opening up the file starting with "01-".
 3. Do the rest of the modules in order.
 
