@@ -42,7 +42,7 @@ Let's explore an aspect of font scaling to help alleviate these pains.
 
 ### Device settings prep
 
-Turn on larger text sizes
+Turn on larger text sizes with the instructions below. The steps may vary by OS version or manufacturer (such as Samsung versus Google if using an Android device).
 
 iOS:
 
@@ -58,6 +58,10 @@ Android:
 2. Display (or Display Size and Text)
 3. Font Size
 4. Drag slider to the largest setting
+
+🏃**Try it.** Open up the app after changing the settings. How well can you navigate around? Log in (if not already), scroll down on the lists, switch tabs.
+
+You should notice some obvious challenges just tapping around the app. Let's continue on and learn how we can fix some of these font scaling issues.
 
 ### Fix the Log In screen
 
@@ -78,7 +82,9 @@ With these changes, the input labels, inputs and button text are all larger - ai
 
 Sometimes, the user will have larger accessibility sizes (or a zoom) enabled. If you noticed on iOS, you have the ability in the Settings app to unlock some larger text sizes. Change the `Larger Accessibility Sizes` toggle and again drag the slider further to the right.
 
-Flip back to the application and you'll notice the screen has changed again! This time, we'll use the `maxFontSizeMultiplier` prop to the screen under control. Try the following:
+🏃**Try it.** Flip back to the application and you'll notice the screen has changed again (for the worse, of course, just developer life things)!
+
+We'll fix it but this time we'll use the `maxFontSizeMultiplier` prop to the screen under control. Try the following:
 
 1. Apply `maxFontSizeMultiplier` to the `<TextField />` labels via `LabelTextProps={{ maxFontSizeMultiplier: 2 }}`
 
@@ -90,57 +96,15 @@ Getting better! The button text still feels extremely large, but you're now full
 
 Feel free to restore your device settings before moving on to the next exercise.
 
-## Exercise 2: Bzzzt! Adding haptics
-
-Often you'll build an experience and it functions great. Sometimes though, it can feel a little flat. Haptics is a great way to add an extra dimension pretty easily, giving the user some physical feedback as they experience your application.
-
-First, let's provide some feedback if the user submits incorrect credentials. For the ease of testing this, from `log-in` route, backspace until you have an invalid email address format (e.g., leave off the domain) and submit the form.
-
-You'll notice the only feedback is the helper text in red. Let's iterate on that feedback to enhance it with haptic feedback.
-
-`src/app/log-in.tsx`
-
-```diff
-+ import * as Haptics from 'expo-haptics'
-
-// ...
-
-// inside function login() {
-- if (validationError) return
-+ if (validationError) {
-+   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-+   return
-+ }
-```
-
-Pretty simple stuff, but now you'll get a nice buzz when the form bounces back with an issue.
-
-Another example of where we could add this feedback is on certain controls, such as the Slider found at the `/profile` route. Add some feedback when the user drags the slider to each value:
-
-`src/app/(app)/(tabs)/profile.tsx`
-
-```diff
-+ import * as Haptics from 'expo-haptics'
-
-// ...
-
-// find <Slider />
-- onValueChange={(value) => setProp("rnFamiliarity", value)}
-+ onValueChange={(value) => {
-+   Haptics.selectionAsync()
-+   setProp("rnFamiliarity", value)
-+ }}
-```
-
-Feel the difference?
-
-## Exercise 3: Start building our themeable component library
+## Exercise 2: Start building our themeable component library
 
 Adding dark mode to your application has its benefits - reduced eye strain, improved readability, increased accessibility for users with light sensitivity. Who wouldn't want to give their users the opportunity to use that in their application?
 
 Let's build out a theming system in the application, which can be used not only for dark mode but your own custom themes if desired (think seasonal themes with custom color palettes for example).
 
 ### Color Palette
+
+First, we'll need another color palette entirely for this dark theme. When the theme is active, these are the color values your components and screens will use, as opposed to the light theme (currently the only set of colors).
 
 Create `src/theme/colorsDark.ts` with the following values (or come up with your own color scheme!):
 
@@ -197,7 +161,9 @@ export const colors = {
 } as const;
 ```
 
-Also create `src/theme/spacingDark.ts` with the following values (again, feel free to mimic the same values as light mode or come up with your own dark mode spacing values):
+Spacing is a first class citizen in Ignite - `src/thee/spacing.ts` has a set of values so your padding, margin and gap values can all be consistent throughout the application. We can consider these values part of the theme like we do colors, this way if you did want separate spacing for a particular theme, you can achieve that.
+
+Create `src/theme/spacingDark.ts` with the following values (again, feel free to mimic the same values as light mode or come up with your own dark mode spacing values):
 
 ```tsx
 /**
@@ -220,7 +186,9 @@ export type Spacing = keyof typeof spacing;
 
 #### Theme Types and Helpers
 
-Update `src/theme/index.ts` to support both light and dark theme configurations and some helper functions to use later in our styling implementation:
+Update `src/theme/index.ts` to support both light and dark theme configurations and some helper functions to use later in our styling implementation.
+
+1. First we'll create the type definitions:
 
 ```tsx
 import type { StyleProp } from "react-native";
@@ -243,7 +211,13 @@ export type Spacing = typeof spacingLight | typeof spacingDark;
 // These two are consistent across themes.
 export type Timing = typeof timing;
 export type Typography = typeof typography;
+```
 
+Here we have the idea of `ThemeContexts`, which in this case will be `light` or `dark` and we'll reserve `undefined` to reference the system theme.
+
+2. Next we'll create the structure of a `Theme` itself, which consists of colors, spacing, typography and timing values.
+
+```tsx
 // The overall Theme object should contain all of the data you need to style your app.
 export interface Theme {
   colors: Colors;
@@ -265,7 +239,11 @@ export const darkTheme: Theme = {
   typography,
   timing,
 };
+```
 
+3. A few helper types that will translate a more primitive React Native style type such as `ViewStyle` into a `ThemedStyle`. Basically, given our current theme objects (colors, spacing, etc), here is what my `ViewStyle` will look like:
+
+```tsx
 /**
  * Represents a function that returns a styled component based on the provided theme.
  * @template T The type of the style.
@@ -291,7 +269,11 @@ export type ThemedStyleArray<T> = (
   | StyleProp<T>
   | (StyleProp<T> | ThemedStyle<T>)[]
 )[];
+```
 
+4. And finally export all these so they're available for use within our project.
+
+```tsx
 // Export the two Theme objects:
 export {
   colorsLight as colors,
@@ -304,7 +286,7 @@ export {
 export { customFontsToLoad } from "./typography";
 ```
 
-Note the export here for `colorsLight` and `spacingLight`. We're exporting them as the original `colors` and `spacing` so that the app doesn't just red box everywhere (since they're currently in use, remember we're applying this to an existing application).
+Note the export here for `colorsLight` and `spacingLight`. We're exporting them as the original `colors` and `spacing` so that the app doesn't just red box everywhere (since they're currently in use, remember, we're applying this to an existing application).
 
 Exporting like this will allow for us to continue using our application even if we haven't finished theming all of the components and routes yet. We can gradually make the changes over time, which is a nicer developer experience.
 
@@ -314,7 +296,7 @@ Next we'll create the context provider which will give the application access to
 
 #### ThemeContext
 
-Create `src/utils/useAppTheme.ts` and start with the context:
+1. Create `src/utils/useAppTheme.ts` and start with the context provider. It will just be a type to keep the `themeScheme` (type of `ThemeContexts`) and the setter function to change this value.
 
 ```tsx
 import {
@@ -351,7 +333,15 @@ export const ThemeContext = createContext<ThemeContextType>({
     Alert.alert("setThemeContextOverride not implemented");
   },
 });
+```
 
+2. Create the `useThemeProvider` hook. This will be used in one of our more top level `_layout.tsx` files just like any other provider with some type of global state.
+
+This way the entire application will have access to them current theme value stored in the context.
+
+It will return the Context Provider, the setter function and the current theme value.
+
+```tsx
 export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
   const colorScheme = useColorScheme();
   const [overrideTheme, setTheme] = useState<ThemeContexts>(initialTheme);
@@ -376,7 +366,9 @@ This Context Provider will keep track of the theme in use. It defaults to `overr
 
 #### The Hook
 
-In the same file, `src/utils/useAppTheme.ts`, add the hook:
+In the same file, `src/utils/useAppTheme.ts`, add the hook.
+
+1. Let's start with the interface for the value being returned by the hook. It will return an object
 
 ```tsx
 interface UseAppThemeValue {
@@ -393,7 +385,13 @@ interface UseAppThemeValue {
     styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>
   ) => T;
 }
+```
 
+2. Implement the `useAppTheme` hook that can be leveraged in your components throughout the application.
+
+Two of the more important properties returned here are the `theme` and the callback `themed` - which will be used to wrap any `ThemeStyle<T>` object before passing it into a component's `style property`
+
+```tsx
 /**
  * Custom hook that provides the app theme and utility functions for theming.
  *
@@ -451,7 +449,7 @@ export const useAppTheme = (): UseAppThemeValue => {
 };
 ```
 
-We're now ready to apply the theme to our existing components and screens!
+All the set up is just about there to start seeing our theming in action. We're now ready to apply the theme to our existing components and screens!
 
 #### Applying the Theme
 
@@ -538,16 +536,25 @@ const toggleTheme = React.useCallback(() => {
 
 Now the theme value is being updated when the user switches their selection. It is also persisted to the MST store, so we can initialize the proper value when the app is restarted.
 
+🏃**Try it.** Navigate to the profile tab and toggle your dark mode selection. Refresh the app and see that it sticks!
+
+Notice, nothing magically changes, we'll implement that magic next! :magic_wand:
+
 #### Update the component library
 
 Next we'll want to update our component library to utilize the theming values in our styles. For this lesson, we're going to enhance the Podcast index screen to support our dark mode.
 
-To do so, we'll need Button, Card, EmptyState, Screen, Text and Toggle to be themeable. Below is the code for each of the completed components. Go for it without peeking 🙈 or walk through the code to spot the differences yourself and understand where the changes are being made.
+To do so, we'll need Button, Card, EmptyState, Screen, Text and Toggle to be themeable. First, we'll walk through the changes to `Button`. Below that will be the diffs for each of the other completed components. Go for it without peeking 🙈 or walk through the code to spot the differences yourself and understand where the changes are being made.
 
-<details>
-  <summary>src/components/Button.tsx</summary>
+If you get stuck, you can copy the full file from `files/01/components`.
 
-```tsx
+### Themed Button
+
+With the hooks and utility functions we created earlier, we will update the `Button` component to receive colors and spacing from the current theme.
+
+1. Import the hook
+
+```diff
 import React, { ComponentType } from "react";
 import {
   Pressable,
@@ -557,99 +564,14 @@ import {
   TextStyle,
   ViewStyle,
 } from "react-native";
-import type { ThemedStyle, ThemedStyleArray } from "src/theme";
++import type { ThemedStyle, ThemedStyleArray } from "src/theme";
 import { Text, TextProps } from "./Text";
-import { useAppTheme } from "src/utils/useAppTheme";
++import { useAppTheme } from "src/utils/useAppTheme";
+```
 
-type Presets = "default" | "filled" | "reversed";
+2. Call the hook under the `props` destructuring
 
-export interface ButtonAccessoryProps {
-  style: StyleProp<any>;
-  pressableState: PressableStateCallbackType;
-  disabled?: boolean;
-}
-
-export interface ButtonProps extends PressableProps {
-  /**
-   * Text which is looked up via i18n.
-   */
-  tx?: TextProps["tx"];
-  /**
-   * The text to display if not using `tx` or nested components.
-   */
-  text?: TextProps["text"];
-  /**
-   * Optional options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
-   */
-  txOptions?: TextProps["txOptions"];
-  /**
-   * Pass any additional props directly to the label Text component.
-   */
-  TextProps?: TextProps;
-  /**
-   * An optional style override useful for padding & margin.
-   */
-  style?: StyleProp<ViewStyle>;
-  /**
-   * An optional style override for the "pressed" state.
-   */
-  pressedStyle?: StyleProp<ViewStyle>;
-  /**
-   * An optional style override for the button text.
-   */
-  textStyle?: StyleProp<TextStyle>;
-  /**
-   * An optional style override for the button text when in the "pressed" state.
-   */
-  pressedTextStyle?: StyleProp<TextStyle>;
-  /**
-   * An optional style override for the button text when in the "disabled" state.
-   */
-  disabledTextStyle?: StyleProp<TextStyle>;
-  /**
-   * One of the different types of button presets.
-   */
-  preset?: Presets;
-  /**
-   * An optional component to render on the right side of the text.
-   * Example: `RightAccessory={(props) => <View {...props} />}`
-   */
-  RightAccessory?: ComponentType<ButtonAccessoryProps>;
-  /**
-   * An optional component to render on the left side of the text.
-   * Example: `LeftAccessory={(props) => <View {...props} />}`
-   */
-  LeftAccessory?: ComponentType<ButtonAccessoryProps>;
-  /**
-   * Children components.
-   */
-  children?: React.ReactNode;
-  /**
-   * disabled prop, accessed directly for declarative styling reasons.
-   * https://reactnative.dev/docs/pressable#disabled
-   */
-  disabled?: boolean;
-  /**
-   * An optional style override for the disabled state
-   */
-  disabledStyle?: StyleProp<ViewStyle>;
-}
-
-/**
- * A component that allows users to take actions and make choices.
- * Wraps the Text component with a Pressable component.
- * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/components/Button/}
- * @param {ButtonProps} props - The props for the `Button` component.
- * @returns {JSX.Element} The rendered `Button` component.
- * @example
- * <Button
- *   tx="common.ok"
- *   style={styles.button}
- *   textStyle={styles.buttonText}
- *   onPress={handleButtonPress}
- * />
- */
+```diff
 export function Button(props: ButtonProps) {
   const {
     tx,
@@ -669,84 +591,40 @@ export function Button(props: ButtonProps) {
     ...rest
   } = props;
 
-  const { themed } = useAppTheme();
++  const { themed } = useAppTheme();
+```
 
-  const preset: Presets = props.preset ?? "default";
-  /**
-   * @param {PressableStateCallbackType} root0 - The root object containing the pressed state.
-   * @param {boolean} root0.pressed - The pressed state.
-   * @returns {StyleProp<ViewStyle>} The view style based on the pressed state.
-   */
-  function $viewStyle({
-    pressed,
-  }: PressableStateCallbackType): StyleProp<ViewStyle> {
-    return [
-      themed($viewPresets[preset]),
-      $viewStyleOverride,
-      !!pressed &&
-        themed([$pressedViewPresets[preset], $pressedViewStyleOverride]),
-      !!disabled && $disabledViewStyleOverride,
-    ];
-  }
-  /**
-   * @param {PressableStateCallbackType} root0 - The root object containing the pressed state.
-   * @param {boolean} root0.pressed - The pressed state.
-   * @returns {StyleProp<TextStyle>} The text style based on the pressed state.
-   */
-  function $textStyle({
-    pressed,
-  }: PressableStateCallbackType): StyleProp<TextStyle> {
-    return [
-      themed($textPresets[preset]),
-      $textStyleOverride,
-      !!pressed &&
-        themed([$pressedTextPresets[preset], $pressedTextStyleOverride]),
-      !!disabled && $disabledTextStyleOverride,
-    ];
-  }
+3. Update dynamic styles defined as functions
 
-  return (
-    <Pressable
-      style={$viewStyle}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: !!disabled }}
-      {...rest}
-      disabled={disabled}
-    >
-      {(state) => (
-        <>
-          {!!LeftAccessory && (
-            <LeftAccessory
-              style={$leftAccessoryStyle}
-              pressableState={state}
-              disabled={disabled}
-            />
-          )}
+```diff
+function $viewStyle({
+  pressed,
+}: PressableStateCallbackType): StyleProp<ViewStyle> {
+  return [
++    themed($viewPresets[preset]),
+    $viewStyleOverride,
+    !!pressed &&
++      themed([$pressedViewPresets[preset], $pressedViewStyleOverride]),
+    !!disabled && $disabledViewStyleOverride,
+  ];
 
-          <Text
-            tx={tx}
-            text={text}
-            txOptions={txOptions}
-            {...TextProps}
-            style={$textStyle(state)}
-          >
-            {children}
-          </Text>
-
-          {!!RightAccessory && (
-            <RightAccessory
-              style={$rightAccessoryStyle}
-              pressableState={state}
-              disabled={disabled}
-            />
-          )}
-        </>
-      )}
-    </Pressable>
-  );
+function $textStyle({
+  pressed,
+}: PressableStateCallbackType): StyleProp<TextStyle> {
+  return [
++    themed($textPresets[preset]),
+    $textStyleOverride,
+    !!pressed &&
++      themed([$pressedTextPresets[preset], $pressedTextStyleOverride]),
+    !!disabled && $disabledTextStyleOverride,
+  ];
 }
+```
 
-const $baseViewStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+4. Update the style objects
+
+```diff
++const $baseViewStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   minHeight: 56,
   borderRadius: 4,
   justifyContent: "center",
@@ -755,9 +633,9 @@ const $baseViewStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
   paddingHorizontal: spacing.sm,
   overflow: "hidden",
-});
++});
 
-const $baseTextStyle: ThemedStyle<TextStyle> = ({ typography }) => ({
++const $baseTextStyle: ThemedStyle<TextStyle> = ({ typography }) => ({
   fontSize: 16,
   lineHeight: 20,
   fontFamily: typography.primary.medium,
@@ -765,68 +643,76 @@ const $baseTextStyle: ThemedStyle<TextStyle> = ({ typography }) => ({
   flexShrink: 1,
   flexGrow: 0,
   zIndex: 2,
-});
++});
 
-const $rightAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
++const $rightAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginStart: spacing.xs,
   zIndex: 1,
-});
-const $leftAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
++});
+
++const $leftAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginEnd: spacing.xs,
   zIndex: 1,
-});
++});
 
-const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
++const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
   default: [
     $baseViewStyle,
-    ({ colors }) => ({
++   ({ colors }) => ({
       borderWidth: 1,
       borderColor: colors.palette.neutral400,
       backgroundColor: colors.palette.neutral100,
-    }),
++  }),
   ],
   filled: [
     $baseViewStyle,
-    ({ colors }) => ({ backgroundColor: colors.palette.neutral300 }),
++    ({ colors }) => ({ backgroundColor: colors.palette.neutral300 }),
   ],
   reversed: [
     $baseViewStyle,
-    ({ colors }) => ({ backgroundColor: colors.palette.neutral800 }),
++    ({ colors }) => ({ backgroundColor: colors.palette.neutral800 }),
   ],
 };
 
-const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
++const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [$baseTextStyle],
   filled: [$baseTextStyle],
   reversed: [
     $baseTextStyle,
-    ({ colors }) => ({ color: colors.palette.neutral100 }),
++    ({ colors }) => ({ color: colors.palette.neutral100 }),
   ],
 };
 
-const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
-  default: ({ colors }) => ({ backgroundColor: colors.palette.neutral200 }),
-  filled: ({ colors }) => ({ backgroundColor: colors.palette.neutral400 }),
-  reversed: ({ colors }) => ({ backgroundColor: colors.palette.neutral700 }),
++const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
++  default: ({ colors }) => ({ backgroundColor: colors.palette.neutral200 }),
++  filled: ({ colors }) => ({ backgroundColor: colors.palette.neutral400 }),
++  reversed: ({ colors }) => ({ backgroundColor: colors.palette.neutral700 }),
 };
 
-const $pressedTextPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
++const $pressedTextPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
   default: () => ({ opacity: 0.9 }),
   filled: () => ({ opacity: 0.9 }),
   reversed: () => ({ opacity: 0.9 }),
 };
+
 ```
 
 </details>
 
-Now that you've styled the `<Button />` component, toggle the theme back and forth from the `profile` route. Observe the button text changes from dark to light and the background from light to dark.
+<br />
+
+🏃**Try it.** Now that you've styled the `<Button />` component, toggle the theme back and forth from the `profile` route. Observe the button text changes from dark to light and the background from light to dark.
 
 You're on your way now! Complete the rest of the necessary components for the `podcast` screen. You'll see that as you tackle these components, the rest of the app will begin changing as an added bonus!
+
+### Themed Card, EmptyState, Screen, Text and Toggle
+
+Work on the remaining components, expand the diffs if you need!
 
 <details>
   <summary>src/components/Card.tsx</summary>
 
-```tsx
+```diff
 import React, {
   Fragment,
   ReactElement,
@@ -842,9 +728,9 @@ import {
   ViewProps,
   ViewStyle,
 } from "react-native";
-import type { ThemedStyle, ThemedStyleArray } from "src/theme";
++ import type { ThemedStyle, ThemedStyleArray } from "src/theme";
 import { Text, TextProps } from "./Text";
-import { useAppTheme } from "src/utils/useAppTheme";
++ import { useAppTheme } from "src/utils/useAppTheme";
 
 type Presets = "default" | "reversed";
 
@@ -991,10 +877,10 @@ export const Card = forwardRef(function Card(props: CardProps, ref) {
     ...WrapperProps
   } = props;
 
-  const {
-    themed,
-    theme: { spacing },
-  } = useAppTheme();
++  const {
++    theme: { colors },
++    themed,
++  } = useAppTheme()
 
   const preset: Presets = props.preset ?? "default";
   const isPressable = !!WrapperProps.onPress;
@@ -1015,24 +901,24 @@ export const Card = forwardRef(function Card(props: CardProps, ref) {
     verticalAlignment === "force-footer-bottom" ? View : Fragment;
 
   const $containerStyle: StyleProp<ViewStyle> = [
-    themed($containerPresets[preset]),
++    themed($containerPresets[preset]),
     $containerStyleOverride,
   ];
   const $headingStyle = [
-    themed($headingPresets[preset]),
++    themed($headingPresets[preset]),
     (isFooterPresent || isContentPresent) && { marginBottom: spacing.xxxs },
     $headingStyleOverride,
     HeadingTextProps?.style,
   ];
   const $contentStyle = [
-    themed($contentPresets[preset]),
++    themed($contentPresets[preset]),
     isHeadingPresent && { marginTop: spacing.xxxs },
     isFooterPresent && { marginBottom: spacing.xxxs },
     $contentStyleOverride,
     ContentTextProps?.style,
   ];
   const $footerStyle = [
-    themed($footerPresets[preset]),
++    themed($footerPresets[preset]),
     (isHeadingPresent || isContentPresent) && { marginTop: spacing.xxxs },
     $footerStyleOverride,
     FooterTextProps?.style,
@@ -1100,7 +986,7 @@ export const Card = forwardRef(function Card(props: CardProps, ref) {
   );
 });
 
-const $containerBase: ThemedStyle<ViewStyle> = (theme) => ({
++const $containerBase: ThemedStyle<ViewStyle> = (theme) => ({
   borderRadius: theme.spacing.md,
   padding: theme.spacing.xs,
   borderWidth: 1,
@@ -1111,51 +997,51 @@ const $containerBase: ThemedStyle<ViewStyle> = (theme) => ({
   elevation: 16,
   minHeight: 96,
   flexDirection: "row",
-});
++});
 
 const $alignmentWrapper: ViewStyle = {
   flex: 1,
   alignSelf: "stretch",
 };
 
-const $alignmentWrapperFlexOptions = {
++const $alignmentWrapperFlexOptions = {
   top: "flex-start",
   center: "center",
   "space-between": "space-between",
   "force-footer-bottom": "space-between",
-} as const;
++} as const;
 
-const $containerPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
++const $containerPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
   default: [
     $containerBase,
-    (theme) => ({
++    (theme) => ({
       backgroundColor: theme.colors.palette.neutral100,
       borderColor: theme.colors.palette.neutral300,
-    }),
++    }),
   ],
   reversed: [
     $containerBase,
-    (theme) => ({
++    (theme) => ({
       backgroundColor: theme.colors.palette.neutral800,
       borderColor: theme.colors.palette.neutral500,
-    }),
++    }),
   ],
 };
 
-const $headingPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
++const $headingPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
-  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
-};
++  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
++};
 
-const $contentPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
++const $contentPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
-  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
-};
++  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
++};
 
-const $footerPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
++const $footerPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
-  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
-};
++  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
++};
 ```
 
 </details>
@@ -1163,7 +1049,7 @@ const $footerPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
 <details>
   <summary>src/components/EmptyState.tsx</summary>
 
-```tsx
+```diff
 import React from "react";
 import {
   Image,
@@ -1177,8 +1063,8 @@ import {
 import { translate } from "../i18n";
 import { Button, ButtonProps } from "./Button";
 import { Text, TextProps } from "./Text";
-import { useAppTheme } from "src/utils/useAppTheme";
-import type { ThemedStyle } from "src/theme";
++import { useAppTheme } from "src/utils/useAppTheme";
++import type { ThemedStyle } from "src/theme";
 
 const sadFace = require("../../assets/images/sad-face.png");
 const sadFaceDark = require("../../assets/images/sad-face-dark.png");
@@ -1291,15 +1177,15 @@ interface EmptyStatePresetItem {
  * @returns {JSX.Element} The rendered `EmptyState` component.
  */
 export function EmptyState(props: EmptyStateProps) {
-  const {
-    themeContext,
-    themed,
-    theme: { spacing },
-  } = useAppTheme();
++  const {
++    themeContext,
++    themed,
++    theme: { spacing },
++  } = useAppTheme();
 
   const EmptyStatePresets = {
     generic: {
-      imageSource: themeContext === "dark" ? sadFaceDark : sadFace,
++      imageSource: themeContext === "dark" ? sadFaceDark : sadFace,
       heading: translate("emptyStateComponent.generic.heading"),
       content: translate("emptyStateComponent.generic.content"),
       button: translate("emptyStateComponent.generic.button"),
@@ -1347,14 +1233,14 @@ export function EmptyState(props: EmptyStateProps) {
     ImageProps?.style,
   ];
   const $headingStyles = [
-    themed($heading),
++    themed($heading),
     isImagePresent && { marginTop: spacing.xxxs },
     (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
     $headingStyleOverride,
     HeadingTextProps?.style,
   ];
   const $contentStyles = [
-    themed($content),
++    themed($content),
     (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxxs },
     isButtonPresent && { marginBottom: spacing.xxxs },
     $contentStyleOverride,
@@ -1411,14 +1297,14 @@ export function EmptyState(props: EmptyStateProps) {
 }
 
 const $image: ImageStyle = { alignSelf: "center" };
-const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
++const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",
   paddingHorizontal: spacing.lg,
-});
-const $content: ThemedStyle<TextStyle> = ({ spacing }) => ({
++});
++const $content: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",
   paddingHorizontal: spacing.lg,
-});
++});
 ```
 
 </details>
@@ -1426,7 +1312,7 @@ const $content: ThemedStyle<TextStyle> = ({ spacing }) => ({
 <details>
   <summary>src/components/Screen.tsx</summary>
 
-```tsx
+```diff
 import { useScrollToTop } from "@react-navigation/native";
 import { StatusBar, StatusBarProps, StatusBarStyle } from "expo-status-bar";
 import React, { useRef, useState } from "react";
@@ -1445,7 +1331,7 @@ import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
 } from "../utils/useSafeAreaInsetsStyle";
-import { useAppTheme } from "src/utils/useAppTheme";
++import { useAppTheme } from "src/utils/useAppTheme";
 
 interface BaseScreenProps {
   /**
@@ -1671,10 +1557,10 @@ function ScreenWithScrolling(props: ScreenProps) {
  * @returns {JSX.Element} The rendered `Screen` component.
  */
 export function Screen(props: ScreenProps) {
-  const {
-    theme: { colors },
-    themeContext,
-  } = useAppTheme();
++  const {
++    theme: { colors },
++    themeContext,
++  } = useAppTheme();
   const {
     backgroundColor,
     KeyboardAvoidingViewProps,
@@ -1695,7 +1581,7 @@ export function Screen(props: ScreenProps) {
       ]}
     >
       <StatusBar
-        style={statusBarStyle || (themeContext === "dark" ? "light" : "dark")}
++        style={statusBarStyle || (themeContext === "dark" ? "light" : "dark")}
         {...StatusBarProps}
       />
 
@@ -1742,7 +1628,7 @@ const $innerStyle: ViewStyle = {
 <details>
   <summary>src/components/Text.tsx</summary>
 
-```tsx
+```diff
 import i18n from "i18n-js";
 import React from "react";
 import {
@@ -1752,8 +1638,8 @@ import {
   TextStyle,
 } from "react-native";
 import { isRTL, translate, TxKeyPath } from "../i18n";
-import type { ThemedStyle, ThemedStyleArray } from "src/theme";
-import { useAppTheme } from "src/utils/useAppTheme";
++import type { ThemedStyle, ThemedStyleArray } from "src/theme";
++import { useAppTheme } from "src/utils/useAppTheme";
 import { typography } from "src/theme/typography";
 
 type Sizes = keyof typeof $sizeStyles;
@@ -1820,7 +1706,7 @@ export function Text(props: TextProps) {
     style: $styleOverride,
     ...rest
   } = props;
-  const { themed } = useAppTheme();
++  const { themed } = useAppTheme();
 
   const i18nText = tx && translate(tx, txOptions);
   const content = i18nText || text || children;
@@ -1828,7 +1714,7 @@ export function Text(props: TextProps) {
   const preset: Presets = props.preset ?? "default";
   const $styles: StyleProp<TextStyle> = [
     $rtlStyle,
-    themed($presets[preset]),
++    themed($presets[preset]),
     weight && $fontWeightStyles[weight],
     size && $sizeStyles[size],
     $styleOverride,
@@ -1858,13 +1744,13 @@ const $fontWeightStyles = Object.entries(typography.primary).reduce(
   {}
 ) as Record<Weights, TextStyle>;
 
-const $baseStyle: ThemedStyle<TextStyle> = (theme) => ({
++const $baseStyle: ThemedStyle<TextStyle> = (theme) => ({
   ...$sizeStyles.sm,
   ...$fontWeightStyles.normal,
   color: theme.colors.text,
-});
++});
 
-const $presets: Record<Presets, ThemedStyleArray<TextStyle>> = {
++const $presets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [$baseStyle],
   bold: [$baseStyle, { ...$fontWeightStyles.bold }],
   heading: [
@@ -1877,7 +1763,7 @@ const $presets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   subheading: [$baseStyle, { ...$sizeStyles.lg, ...$fontWeightStyles.medium }],
   formLabel: [$baseStyle, { ...$fontWeightStyles.medium }],
   formHelper: [$baseStyle, { ...$sizeStyles.sm, ...$fontWeightStyles.normal }],
-};
++};
 const $rtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {};
 ```
 
@@ -1886,7 +1772,7 @@ const $rtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {};
 <details>
   <summary>src/components/Toggle.tsx</summary>
 
-```tsx
+```diff
 import React, { ComponentType, FC, useMemo } from "react";
 import {
   Animated,
@@ -1905,11 +1791,11 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { ThemedStyle, colors } from "../theme";
++import { ThemedStyle, colors } from "../theme";
 import { iconRegistry, IconTypes } from "./Icon";
 import { Text, TextProps } from "./Text";
 import { isRTL } from "src/i18n";
-import { useAppTheme } from "src/utils/useAppTheme";
++import { useAppTheme } from "src/utils/useAppTheme";
 
 type Variants = "checkbox" | "switch" | "radio";
 
@@ -2079,10 +1965,10 @@ export function Toggle(props: ToggleProps) {
   const { switchAccessibilityMode } = props as SwitchToggleProps;
   const { checkboxIcon } = props as CheckboxToggleProps;
 
-  const {
-    theme: { colors },
-    themed,
-  } = useAppTheme();
++  const {
++    theme: { colors },
++    themed,
++  } = useAppTheme();
   const disabled =
     editable === false || status === "disabled" || props.disabled;
 
@@ -2100,11 +1986,11 @@ export function Toggle(props: ToggleProps) {
 
   const $containerStyles = [$containerStyleOverride];
   const $inputWrapperStyles = [$inputWrapper, $inputWrapperStyleOverride];
-  const $helperStyles = themed([
++  const $helperStyles = themed([
     $helper,
     status === "error" && { color: colors.error },
     HelperTextProps?.style,
-  ]);
++  ]);
 
   /**
    * @param {GestureResponderEvent} e - The event object.
@@ -2628,7 +2514,7 @@ const $inputOuter: StyleProp<ViewStyle> = [
   { height: 32, width: 56, borderRadius: 16, borderWidth: 0 },
 ];
 
-const $switchInner: ThemedStyle<ViewStyle> = ({ colors }) => ({
++const $switchInner: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: "100%",
   height: "100%",
   alignItems: "center",
@@ -2637,7 +2523,7 @@ const $switchInner: ThemedStyle<ViewStyle> = ({ colors }) => ({
   position: "absolute",
   paddingStart: 4,
   paddingEnd: 4,
-});
++});
 
 const $switchDetail: SwitchToggleProps["inputDetailStyle"] = {
   borderRadius: 12,
@@ -2670,63 +2556,41 @@ const $switchAccessibilityCircle: ViewStyle = {
   borderRadius: 6,
 };
 
-const $helper: ThemedStyle<TextStyle> = ({ spacing }) => ({
++const $helper: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
-});
++});
 
 const $label: TextStyle = {
   flex: 1,
 };
 
-const $labelRight: ThemedStyle<TextStyle> = ({ spacing }) => ({
++const $labelRight: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginStart: spacing.md,
-});
++});
 
-const $labelLeft: ThemedStyle<TextStyle> = ({ spacing }) => ({
++const $labelLeft: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginEnd: spacing.md,
-});
++});
 ```
 
 </details>
+<br />
+
+🏃**Try it.** Toggle the theme back and forth again while checking out the Podcasts route (honestly, any part of the app since we're working on our component library). You'll see we're not quite there yet, but making good progress!
 
 #### Finally, update the Podcasts route
 
+Ok, the final push to getting our Podcasts route styled for dark theme! Still hanging in? 😅
+
+Now that we've set up the context provider and restyled the necessary component primitives we utilize on our screen, we have one task left to accomplish our goal. Within the Podcasts screen itself, we have to also update any styles with colors and spacing from the active theme and apply any `themed` helpers where necessary.
+
+More of the same, just in a different spot - you got this! If you get stuck along the way, the final solution can be found in `files/01/app/(app)/(tabs)/podcasts/index.tsx`.
+
 Update the Podcasts screen for dynamic theming in `src/app/(app)/(tabs)/podcasts/index.tsx`:
 
+1. First, tackle the `DemoPodcastListScreen` component
+
 ```diff
-import { observer } from "mobx-react-lite"
-import React, { ComponentType, FC, useEffect, useMemo } from "react"
-import {
-  AccessibilityProps,
-  ActivityIndicator,
-  Image,
-  ImageSourcePropType,
-  ImageStyle,
-  Platform,
-  StyleSheet,
-  TextStyle,
-  View,
-  ViewStyle,
-} from "react-native"
-import { type ContentStyle } from "@shopify/flash-list"
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated"
-import {
-  Button,
-  ButtonAccessoryProps,
-  Card,
-  EmptyState,
-  Icon,
-  ListView,
-  Screen,
-  Text,
-  Toggle,
-} from "src/components"
 import { isRTL, translate } from "src/i18n"
 import { useStores } from "src/models"
 import { Episode } from "src/models/Episode"
@@ -2735,12 +2599,7 @@ import { delay } from "src/utils/delay"
 +import { useAppTheme } from "src/utils/useAppTheme"
 import { Link } from "expo-router"
 
-const ICON_SIZE = 14
-
-const rnrImage1 = require("assets/images/demo/rnr-image-1.png")
-const rnrImage2 = require("assets/images/demo/rnr-image-2.png")
-const rnrImage3 = require("assets/images/demo/rnr-image-3.png")
-const rnrImages = [rnrImage1, rnrImage2, rnrImage3]
+// ...
 
 export default observer(function DemoPodcastListScreen(_props) {
   const { episodeStore } = useStores()
@@ -2829,7 +2688,11 @@ export default observer(function DemoPodcastListScreen(_props) {
     </Screen>
   )
 })
+```
 
+2. Now for the `EpisodeCard` child component (same file)
+
+```diff
 const EpisodeCard = observer(function EpisodeCard({
   episode,
   isFavorite,
@@ -2850,60 +2713,7 @@ const EpisodeCard = observer(function EpisodeCard({
     return rnrImages[Math.floor(Math.random() * rnrImages.length)]
   }, [])
 
-  // Grey heart
-  const animatedLikeButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          scale: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.EXTEND),
-        },
-      ],
-      opacity: interpolate(liked.value, [0, 1], [1, 0], Extrapolation.CLAMP),
-    }
-  })
-
-  // Pink heart
-  const animatedUnlikeButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          scale: liked.value,
-        },
-      ],
-      opacity: liked.value,
-    }
-  })
-
-  /**
-   * Android has a "longpress" accessibility action. iOS does not, so we just have to use a hint.
-   * @see https://reactnative.dev/docs/accessibility#accessibilityactions
-   */
-  const accessibilityHintProps = useMemo(
-    () =>
-      Platform.select<AccessibilityProps>({
-        ios: {
-          accessibilityLabel: episode.title,
-          accessibilityHint: translate("demoPodcastListScreen.accessibility.cardHint", {
-            action: isFavorite ? "unfavorite" : "favorite",
-          }),
-        },
-        android: {
-          accessibilityLabel: episode.title,
-          accessibilityActions: [
-            {
-              name: "longpress",
-              label: translate("demoPodcastListScreen.accessibility.favoriteAction"),
-            },
-          ],
-          onAccessibilityAction: ({ nativeEvent }) => {
-            if (nativeEvent.actionName === "longpress") {
-              handlePressFavorite()
-            }
-          },
-        },
-      }),
-    [episode, isFavorite],
-  )
+  // ... some animation and accessibility code ...
 
   const handlePressFavorite = () => {
     onPressFavorite()
@@ -2992,7 +2802,11 @@ const EpisodeCard = observer(function EpisodeCard({
     </Link>
   )
 })
+```
 
+3. Now just touch up the styles
+
+```diff
 const $screenContentContainer: ViewStyle = {
   flex: 1,
 }
@@ -3074,9 +2888,16 @@ const $emptyStateImage: ImageStyle = {
 }
 ```
 
+You'll notice a bunch of the styles became functions of the theme. Many of them are just spacing, which might not be too noticeable. The reason for that is due to the contents of `src/theme/spacingDark.ts`. The values here are the same as the light theme.
+
+🏃**Try it.** Open up `src/theme/spacingDark.ts` and play with some of the spacing values and toggle your dark theme to see your views adjust!
+
+Congrats! ✨ You've made it (for this screen, with this set of components, at least - hah!). You're now fully capable on telling your boss why the task _"just add dark mode"_ isn't a half day task.
+
 ## Side Quests
 
-- Update the rest of the components
+- [Bzzzt! Adding haptics](./companions/01/expo-haptics.md)
+- Update the rest of the `src/components` for theming
 - Support dark mode for any of the other screens
 - Create a third theme with your own color palette
 
