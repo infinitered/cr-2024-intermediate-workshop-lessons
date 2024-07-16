@@ -95,57 +95,7 @@ Getting better! The button text still feels extremely large, but you're now full
 
 Feel free to restore your device settings before moving on to the next exercise.
 
-## Exercise 2: Bzzzt! Adding haptics
-
-Often you'll build an experience and it functions great. Sometimes though, it can feel a little flat. Haptics is a great way to add an extra dimension pretty easily, giving the user some physical feedback as they experience your application.
-
-First, let's provide some feedback if the user submits incorrect credentials.
-
-🏃**Try it.** For the ease of testing this, from `log-in` route, backspace until you have an invalid email address format (e.g., leave off the domain) and submit the form.
-
-You'll notice the only feedback is the helper text in red. It's something, but feels lacking. Let's iterate on that feedback to enhance it with haptic feedback.
-
-`src/app/log-in.tsx`
-
-```diff
-+ import * as Haptics from 'expo-haptics'
-
-// ...
-
-// inside function login() {
-- if (validationError) return
-+ if (validationError) {
-+   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-+   return
-+ }
-```
-
-Pretty simple stuff, but now you'll get a nice buzz when the form bounces back with an issue.
-
-🏃**Try it.** Submit an invalid email again and actually feel the feedback this time. Play with the intensity as well via `ImpactFeedbackStyle`.
-
-Another example of where we could add this feedback is on certain controls, such as the Slider found at the `/profile` route. Add some feedback when the user drags the slider to each value:
-
-`src/app/(app)/(tabs)/profile.tsx`
-
-```diff
-+ import * as Haptics from 'expo-haptics'
-
-// ...
-
-// find <Slider />
-- onValueChange={(value) => setProp("rnFamiliarity", value)}
-+ onValueChange={(value) => {
-+   Haptics.selectionAsync()
-+   setProp("rnFamiliarity", value)
-+ }}
-```
-
-🏃**Try it.** Change the slider values around. Feel the difference?
-
-Simple, but effective.
-
-## Exercise 3: Start building our themeable component library
+## Exercise 2: Start building our themeable component library
 
 Adding dark mode to your application has its benefits - reduced eye strain, improved readability, increased accessibility for users with light sensitivity. Who wouldn't want to give their users the opportunity to use that in their application?
 
@@ -2939,13 +2889,14 @@ const $emptyStateImage: ImageStyle = {
 
 You'll notice a bunch of the styles became functions of the theme. Many of them are just spacing, which might not be too noticeable. The reason for that is due to the contents of `src/theme/spacingDark.ts`. The values here are the same as the light theme.
 
-🏃**Try it.** Open up `src/theme.spacingDark.ts` and play with some of the spacing values and toggle your dark theme to see your views adjust!
+🏃**Try it.** Open up `src/theme/spacingDark.ts` and play with some of the spacing values and toggle your dark theme to see your views adjust!
 
 Congrats! ✨ You've made it (for this screen, with this set of components, at least - hah!). You're now fully capable on telling your boss why the task _"just add dark mode"_ isn't a half day task.
 
 ## Side Quests
 
-- Update the rest of the components
+- [Bzzzt! Adding haptics](./companions/01/expo-haptics.md)
+- Update the rest of the `src/components` for theming
 - Support dark mode for any of the other screens
 - Create a third theme with your own color palette
 
