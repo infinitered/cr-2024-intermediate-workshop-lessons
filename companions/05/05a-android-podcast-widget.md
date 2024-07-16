@@ -5,13 +5,16 @@
 These instructions continue where Module 05 left off, describing how to transform your "hello" widget into one that displays information about favorited podcasts.
 
 ## Renaming things
+
 Let's rename `HelloWidget` to `FavoriteEpisodeWidget`:
+
 - Rename **HelloWidget.tsx** to **FavoriteEpisodeWidget.tsx**,
-- change the component name, and
-- change the component reference in **widget-task-handler.tsx**.
-- change the `name` in the config plugin in **app.json** to `FavoriteEpisode`
+- Change the component name, and
+- Change the component reference in **widget-task-handler.tsx**.
+- Change the `name` in the config plugin in **app.json** to `FavoriteEpisode`
 
 ## Basic data flow
+
 Let's output the episodes to the widget and finish implementing refresh. That way, all our data flow will be working, and everything else will just be styling and some in-widget functionality.
 
 1. Update **FavoriteEpisodeWidget.tsx** to read episodes and output them to a list:
@@ -19,16 +22,18 @@ Let's output the episodes to the widget and finish implementing refresh. That wa
 ```tsx
 /* eslint-disable react-native/no-color-literals */
 /* eslint-disable react-native/no-inline-styles */
-import React from "react"
-import { ListWidget, TextWidget } from "react-native-android-widget"
-import { Episode } from "src/models/Episode"
-import { colors } from "src/theme"
+import React from "react";
+import { ListWidget, TextWidget } from "react-native-android-widget";
+import { Episode } from "src/models/Episode";
+import { colors } from "src/theme";
 
 interface FavoriteEpisodeWidgetProps {
-  episodes: Episode[]
+  episodes: Episode[];
 }
 
-export function FavoriteEpisodeWidget({ episodes }: FavoriteEpisodeWidgetProps) {
+export function FavoriteEpisodeWidget({
+  episodes,
+}: FavoriteEpisodeWidgetProps) {
   return (
     <ListWidget
       style={{
@@ -37,17 +42,20 @@ export function FavoriteEpisodeWidget({ episodes }: FavoriteEpisodeWidgetProps) 
         backgroundColor: colors.background,
       }}
     >
-    {episodes.map(episode => (
-      <TextWidget
-        key={episode.guid}
-        text={episode.parsedTitleAndSubtitle.subtitle}
-        style={{
-          fontSize: 16,
-          fontFamily: "Inter",
-          color: colors.text,
-        }}
-      />
-    )}
+      {episodes.map((episode) => (
+        <TextWidget
+          key={episode.guid}
+          text={episode.parsedTitleAndSubtitle.subtitle}
+          style={{
+            fontSize: 16,
+            fontFamily: "Inter",
+            color: colors.text,
+          }}
+        />
+      ))}
+    </ListWidget>
+  );
+}
 ```
 
 2. Read episodes from the `EpisodeStore` in **widget-task-handler.tsx**:
@@ -81,15 +89,14 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 <details>
   <summary>Expand to just get the whole file's new code for easy copying</summary>
 
-  ```tsx
-import React from "react"
+```tsx
+import React from "react";
 import type { WidgetTaskHandlerProps } from "react-native-android-widget";
 import { FavoriteEpisodeWidget } from "./FavoriteEpisodeWidget";
-import { setupRootStore, RootStoreModel } from 'src/models';
+import { setupRootStore, RootStoreModel } from "src/models";
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
-
-  const { rootStore } = await setupRootStore(RootStoreModel.create({}))
+  const { rootStore } = await setupRootStore(RootStoreModel.create({}));
 
   switch (props.widgetAction) {
     case "WIDGET_ADDED":
@@ -124,7 +131,7 @@ export const updateEpisodesWidget = (episodes: Episode[]) => {
   if (Platform.OS === "android") {
 +    requestWidgetUpdate({
 +      widgetName: "FavoriteEpisode",
-+      renderWidget: () => <HelloWidget episodes={episodes} />,
++      renderWidget: () => <FavoriteEpisodeWidget episodes={episodes} />,
 +      widgetNotFound: () => {
 +        // Called if no widget is present on the home screen
 +      },
@@ -135,28 +142,27 @@ export const updateEpisodesWidget = (episodes: Episode[]) => {
 <details>
   <summary>Expand to just get the whole file's new code for easy copying</summary>
 
-  ```tsx
-
-import React from "react"
-import { Platform } from "react-native"
-import { requestWidgetUpdate } from "react-native-android-widget"
-import { Episode } from "src/models/Episode"
-import { FavoriteEpisodeWidget } from "./android/FavoriteEpisodeWidget"
+```tsx
+import React from "react";
+import { Platform } from "react-native";
+import { requestWidgetUpdate } from "react-native-android-widget";
+import { Episode } from "src/models/Episode";
+import { FavoriteEpisodeWidget } from "./android/FavoriteEpisodeWidget";
 
 export const updateEpisodesWidget = (episodes: Episode[]) => {
   if (Platform.OS === "android") {
     requestWidgetUpdate({
       widgetName: "FavoriteEpisode",
-      renderWidget: () => <HelloWidget episodes={episodes} />,
+      renderWidget: () => <FavoriteEpisodeWidget episodes={episodes} />,
       widgetNotFound: () => {
         // Called if no widget is present on the home screen
       },
-    })
+    });
   }
   if (Platform.OS === "ios") {
     // iOS widget refresh code
   }
-}
+};
 ```
 
 </details>
@@ -232,27 +238,29 @@ We need something to separate the episodes. By now, you can probably see that th
 Add an empty condition just before `episodes.map`:
 
 ```tsx
-{episodes.length === 0 && (
-  <FlexWidget
-    style={{
-      height: "match_parent",
-      width: "match_parent",
-      justifyContent: "center",
-      alignItems: "center",
-    }}
-    clickAction="OPEN_URI"
-    clickActionData={{ uri: "cr2024-im://podcasts" }}
-  >
-    <TextWidget
-      text="No episodes favorited yet. Tap here to start!"
+{
+  episodes.length === 0 && (
+    <FlexWidget
       style={{
-        fontSize: 16,
-        fontFamily: "Inter",
-        color: colors.text,
+        height: "match_parent",
+        width: "match_parent",
+        justifyContent: "center",
+        alignItems: "center",
       }}
-    />
-  </FlexWidget>
-)}
+      clickAction="OPEN_URI"
+      clickActionData={{ uri: "cr2024-im://podcasts" }}
+    >
+      <TextWidget
+        text="No episodes favorited yet. Tap here to start!"
+        style={{
+          fontSize: 16,
+          fontFamily: "Inter",
+          color: colors.text,
+        }}
+      />
+    </FlexWidget>
+  );
+}
 ```
 
 🏃**Try it.** A little simple, but it'll do the trick. Favorite some podcasts and watch it dissappear again.
@@ -300,20 +308,21 @@ We can lean on Expo Router and automatic deep linking to help with that. Widgets
 🏃**Try it.** Tap on a podcast. It should take you to that podcast. Try the back button, too.
 
 ### Fix Expo Router back behavior
+
 You may have noticed your back button not working. This can happen when going directly to a deep link, as your app will not know where to go back to. Expo Router has a setting to fix this.
 
-In **src/app/(app)/(tabs)/podcast/_layout.tsx**, add this:
+In **src/app/(app)/(tabs)/podcast/\_layout.tsx**, add this:
 
 ```tsx
 // eslint-disable-next-line camelcase
 export const unstable_settings = {
   // Ensure any route can link back to `/`
-  initialRouteName: 'index',
+  initialRouteName: "index",
 };
-
 ```
 
 This will tell Expo Router that the top level route of the podcasts group is **index**, so it will be able to go back there even if it starts at a specific podcast.
 
 ## Side Quests
+
 You could probably figure out something better for styling the podcast rows or the divider between them. If you have extra time, go for it!

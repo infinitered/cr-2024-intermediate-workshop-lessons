@@ -17,7 +17,8 @@ Learn how to use config plugins like `react-native-android-widget` and `expo-app
 
 ### Resources
 
-- Add any helpful links here
+- [iOS Human Interface Guidelines on Widgets](https://developer.apple.com/design/human-interface-guidelines/widgets)
+- [Android Widgets Overview](https://developer.android.com/develop/ui/views/appwidgets/overview)
 
 # Exercises
 
@@ -72,9 +73,8 @@ Let's do the absolute minimum with `react-native-android-widget` to get a very b
 3. Create **src/widgets/android/HelloWidget.tsx** with the following code:
 
 ```tsx
-import React from "react"
-import { FlexWidget, TextWidget } from "react-native-android-widget"
-
+import React from "react";
+import { FlexWidget, TextWidget } from "react-native-android-widget";
 
 export function HelloWidget() {
   return (
@@ -98,7 +98,7 @@ export function HelloWidget() {
         }}
       />
     </FlexWidget>
-  )
+  );
 }
 ```
 
@@ -107,7 +107,7 @@ This is a special limited form of JSX that can be used by `react-native-android-
 4. Create **src/widgets/android/widget-task-handler.tsx** with the following code:
 
 ```tsx
-import React from "react"
+import React from "react";
 import type { WidgetTaskHandlerProps } from "react-native-android-widget";
 import { HelloWidget } from "./HelloWidget";
 
@@ -116,9 +116,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     case "WIDGET_ADDED":
     case "WIDGET_UPDATE":
     case "WIDGET_RESIZED":
-      props.renderWidget(
-        <HelloWidget />
-      );
+      props.renderWidget(<HelloWidget />);
       break;
     default:
       break;
@@ -137,26 +135,19 @@ Create **src/main.tsx** and add this code, which is mostly adapted from the defa
 ```tsx
 // `@expo/metro-runtime` MUST be the first import to ensure Fast Refresh works
 // on web.
-import '@expo/metro-runtime';
+import "@expo/metro-runtime";
 
-import { App } from 'expo-router/build/qualified-entry';
-import { renderRootComponent } from 'expo-router/build/renderRootComponent';
-import { registerWidgetTaskHandler } from 'react-native-android-widget';
+import { App } from "expo-router/build/qualified-entry";
+import { renderRootComponent } from "expo-router/build/renderRootComponent";
+import { registerWidgetTaskHandler } from "react-native-android-widget";
 
-import { widgetTaskHandler } from './widgets/android/widget-task-handler';
+import { widgetTaskHandler } from "./widgets/android/widget-task-handler";
 
 // This file should only import and register the root. No components or exports
 // should be added here.
 renderRootComponent(App);
 
 registerWidgetTaskHandler(widgetTaskHandler);
-```
-
-Update your main in **package.json** accordingly:
-
-```diff
-- "main": "expo-router/entry",
-+ "main": "src/main.tsx",
 ```
 
 6. Update **package.json** to use the new entry point:
@@ -172,7 +163,7 @@ Update your main in **package.json** accordingly:
 
 Let's do the minimum with `@bacons/apple-target` to get a very basic "Hello World" widget on our home screen on iOS.
 
-1. Run `yarn add --dev @bacons/expo-targets` to install the config plugin.
+1. Run `yarn add @bacons/apple-targets` to install the config plugin.
 
 2. Add the following to your `plugins` array in **app.json** to configure the widget:
 
@@ -224,7 +215,7 @@ struct exportWidgets: WidgetBundle {
 
 This is where you tell XCode what code you're using to generate your widgets.
 
-🏃**Try it.** Run `npx expo prebuild --clean` and `npx expo run:ios`. You should be able to find your widget by pressing the "+" button on the widgets panel and typing in "Ignite" in the search (they don't populate on the simulator by default, not sure why).
+🏃**Try it.** Run `npx expo prebuild --clean` and `npx expo run:ios`. You should be able to find your widget by pressing the "+" button on the widgets panel and typing in `cr2024-im` in the search (they don't populate on the simulator by default, not sure why).
 
 You'll see some new files show up in **target/widgets**. This happens on Prebuild via `expo-apple-targets`. It turns that **expo-target.config.js** file into files needed by XCode for widget integration.
 
@@ -237,8 +228,8 @@ So, let's make a stub function for refreshing the widget whenever your app data 
 1. Create **src/widgets/widget-refresher.tsx**, and add this code:
 
 ```tsx
-import { Platform } from "react-native"
-import { Episode } from "src/models/Episode"
+import { Platform } from "react-native";
+import { Episode } from "src/models/Episode";
 
 export const updateEpisodesWidget = (episodes: Episode[]) => {
   if (Platform.OS === "android") {
@@ -247,13 +238,13 @@ export const updateEpisodesWidget = (episodes: Episode[]) => {
   if (Platform.OS === "ios") {
     // refresh iOS widget here
   }
-}
+};
 ```
 
-2. In **EpisodeModel.ts**, import the refresh function:
+2. In **EpisodeStore.ts**, import the refresh function:
 
 ```ts
-import { updateEpisodesWidget } from "../widgets/widget-refresher"
+import { updateEpisodesWidget } from "../widgets/widget-refresher";
 ```
 
 and call it when updating favorites:
@@ -269,11 +260,11 @@ removeFavorite(episode: Episode) {
 },
 ```
 
-3. In the post-login layout (**src/app/(app)/_layout.tsx**), import the refresh function and `AppState`:
+3. In the post-login layout (**src/app/(app)/\_layout.tsx**), import the refresh function and `AppState`:
 
 ```tsx
-import { AppState } from "react-native"
-import { updateEpisodesWidget } from "../../widgets/widget-refresher"
+import { AppState } from "react-native";
+import { updateEpisodesWidget } from "../../widgets/widget-refresher";
 ```
 
 grab `episodeStore` from `useStores()`:
@@ -291,14 +282,14 @@ and add a listener to refresh the widget on resume from background:
 React.useEffect(() => {
   const subscription = AppState.addEventListener("change", (appState) => {
     if (appState === "active") {
-      updateEpisodesWidget(episodeStore.favorites.slice())
+      updateEpisodesWidget(episodeStore.favorites.slice());
     }
-  })
+  });
 
   return () => {
-    subscription.remove()
-  }
-}, [])
+    subscription.remove();
+  };
+}, []);
 ```
 
 🏃**Try it (if you want to).** It shouldn't break anything, but it also shouldn't do anything yet.
@@ -306,10 +297,12 @@ React.useEffect(() => {
 ## Exercise 3(a) and 3(i): Choose-your-own-widget-adventure
 
 We're going to make the widgets do something useful- showing the favorite episodes of the podcast, updating the widget each time a podcast's favorite status is changed. We'll make each widget slightly different, based on the capabilities offered by the OS:
+
 - **Android**: scroll through a list of favorite podcasts. Tapping a podcast will deep link you to that podcast.
 - **iOS**: show the latest favorite podcast and a badge indicating how many other podcasts are favorited. Implement different styles for the small and medium widget form factors. Deep link to the latest podcast on tap.
 
 At this point, you can decide which widget you'd like to work on first. Use the links below to navigate to the remaining instructions for each widget. Once you're done with one, come back for the other:
+
 - [Android favorite podcasts widget instructions](/companions/05/05a-android-podcast-widget.md)
 - [iOS favorite podcasts widget instructions](/companions/05/05i-ios-podcast-widget.md)
 
