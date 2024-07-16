@@ -31,6 +31,14 @@ Let's make our app feel more cohesive with the operating system by respecting th
 
 We'll need some dark mode assets later in this lesson. Copy the `sad-face-dark*.png` files from `files/01` into the project's `assets/images` directory
 
+On macOS or Linux you can download the files with the following commands:
+
+```
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/01/sad-face-dark.png > assets/images/sad-face-dark.png
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/01/sad-face-dark@2x.png > assets/images/sad-face-dark@2x.png
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/01/sad-face-dark@3x.png > assets/images/sad-face-dark@3x.png
+```
+
 ## Exercise 1: Font scaling that looks good!
 
 One of the greatest benefits to using React Native (and even more so with Expo) is the velocity we can achieve during development. The product team asks, you whip it up and deliver. It works among the team of 5 doing wonders for your next start up.
