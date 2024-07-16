@@ -74,7 +74,7 @@ We know that the heading and subheading are already large from our style impleme
 
 `src/app/log-in.tsx`
 
-```
+```typescript
 <Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$logIn} allowFontScaling={false} />
 <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} allowFontScaling={false} />
 ```
@@ -91,7 +91,7 @@ Flip back to the application and you'll notice the screen has changed again! Thi
 
 Still very readable, but notice the text is still not visible in the textfield itself. If you type, it looks as if nothing is being entered into the fields.
 
-2. Apply `maxFontSizeMultiplier` to the `<TextField />` input via `maxFontSizeMultiplier={{ maxFontSizeMultiplier: 2 }}`
+2. Apply `maxFontSizeMultiplier` to the `<TextField />` input via `maxFontSizeMultiplier={2}`
 
 Getting better! The button text still feels extremely large, but you're now fully equipped to deal with this issue. Using a value of 2 for the `maxFontSizeMultiplier` prop is just an example, you can come up with a factor based on the device size, dimensions, font scale and so on.
 
