@@ -32,6 +32,14 @@ Let's make our app feel more cohesive with the operating system by respecting th
 
 We'll need some dark mode assets later in this lesson. Copy the `sad-face-dark*.png` files from `files/01` into the project's `assets/images` directory
 
+On macOS or Linux you can download the files with the following commands:
+
+```
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/01/sad-face-dark.png > assets/images/sad-face-dark.png
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/01/sad-face-dark@2x.png > assets/images/sad-face-dark@2x.png
+curl https://raw.githubusercontent.com/infinitered/cr-2024-intermediate-workshop-lessons/main/files/01/sad-face-dark@3x.png > assets/images/sad-face-dark@3x.png
+```
+
 ## Exercise 1: Font scaling that looks good!
 
 One of the greatest benefits to using React Native (and even more so with Expo) is the velocity we can achieve during development. The product team asks, you whip it up and deliver. It works among the team of 5 doing wonders for your next start up.
@@ -71,7 +79,7 @@ We know that the heading and subheading are already large from our style impleme
 
 `src/app/log-in.tsx`
 
-```
+```typescript
 <Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$logIn} allowFontScaling={false} />
 <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} allowFontScaling={false} />
 ```
@@ -90,7 +98,7 @@ We'll fix it but this time we'll use the `maxFontSizeMultiplier` prop to the scr
 
 Still very readable, but notice the text is still not visible in the textfield itself. If you type, it looks as if nothing is being entered into the fields.
 
-2. Apply `maxFontSizeMultiplier` to the `<TextField />` input via `maxFontSizeMultiplier={{ maxFontSizeMultiplier: 2 }}`
+2. Apply `maxFontSizeMultiplier` to the `<TextField />` input via `maxFontSizeMultiplier={2}`
 
 Getting better! The button text still feels extremely large, but you're now fully equipped to deal with this issue. Using a value of 2 for the `maxFontSizeMultiplier` prop is just an example, you can come up with a factor based on the device size, dimensions, font scale and so on.
 
