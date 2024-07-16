@@ -22,6 +22,7 @@ Let's make our app feel more cohesive with the operating system by respecting th
   - [allowFontScaling](https://reactnative.dev/docs/text#allowfontscaling)
   - [maxFontSizeMultiplier](https://reactnative.dev/docs/text#maxfontsizemultiplier)
   - [useWindowDimensions().fontScale](https://reactnative.dev/docs/usewindowdimensions#fontscale)
+- [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - [Kadi Kraman's video on _Enhancing your React Native App with Haptics, Sounds and Micro-Animations_](https://www.youtube.com/watch?v=hDGASxkKEXE)
 - [Mark Rickert's PR to Ignite for Theming and Documentation](https://github.com/infinitered/ignite/pull/2636)
 
