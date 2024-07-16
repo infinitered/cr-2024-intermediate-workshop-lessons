@@ -37,12 +37,12 @@ Let's do the most simple thing possible: add an action to the long-press menu, a
 
 ### Add a simple quick action and listener
 
-Do the following in **src/app/_layout.tsx**:
+Do the following in **src/app/\_layout.tsx**:
 
 4. Import `expo-quick-actions`:
 
 ```tsx
-import * as QuickActions from "expo-quick-actions"
+import * as QuickActions from "expo-quick-actions";
 ```
 
 5. At the top of your file (doesn't have to be inside a component), setup a quick action. This is what actually puts the quick action in the long press menu:
@@ -56,7 +56,7 @@ QuickActions.setItems([
     icon: "heart",
     params: { stuff: "whatever" },
   },
-])
+]);
 ```
 
 6. Add a listener (also could be anywhere in the file) that will execute when the quick action is tapped:
@@ -64,7 +64,7 @@ QuickActions.setItems([
 ```tsx
 const subscription = QuickActions.addListener((action) => {
   console.log(action);
-})
+});
 ```
 
 🏃**Try it.** Open the app, leave it, long press, and see what happens!
@@ -81,21 +81,21 @@ Technically (in native-land), the quick action parameters can be anything, but, 
 
 ### Add "quick action routing"
 
-Add all of this code in **src/app/(app)/_layout.tsx** (this will help delay the setup until the user is "logged in"):
+Add all of this code in **src/app/(app)/\_layout.tsx** (this will help delay the setup until the user is "logged in"):
 
 2. Add imports:
 
 ```tsx
-import { Platform } from "react-native"
+import { Platform } from "react-native";
 // ...
-import * as QuickActions from "expo-quick-actions"
-import { useQuickActionRouting, RouterAction } from "expo-quick-actions/router"
+import * as QuickActions from "expo-quick-actions";
+import { useQuickActionRouting, RouterAction } from "expo-quick-actions/router";
 ```
 
 3. Inside the component, add the following:
 
 ```tsx
-useQuickActionRouting()
+useQuickActionRouting();
 
 React.useEffect(() => {
   QuickActions.setItems<RouterAction>([
@@ -106,8 +106,8 @@ React.useEffect(() => {
       id: "0",
       params: { href: "/(app)/(tabs)/profile" },
     },
-  ])
-}, [])
+  ]);
+}, []);
 ```
 
 <!-- TODO: find an appropriate SF icon -->
@@ -120,7 +120,7 @@ A quick action to the Podcasts tab would be... fine, but what if it could take u
 
 ### Add the quick action
 
-1. Add another list item to the `setItems` function called in **src/app/(app)/_layout.tsx**:
+1. Add another list item to the `setItems` function called in **src/app/(app)/\_layout.tsx**:
 
 ```tsx
 {
@@ -136,8 +136,6 @@ A quick action to the Podcasts tab would be... fine, but what if it could take u
 
 Spoiler alert: we're going to create that new route next.
 
-<!-- TODO: find an appropriate SF icon -->
-
 ### "Latest" podcast route
 
 2. Create the file: **src/app/(app)/(tabs)/podcasts/latest.tsx**:
@@ -147,7 +145,7 @@ Spoiler alert: we're going to create that new route next.
 ```tsx
 export default () => {
   return null;
-}
+};
 ```
 
 🏃**Try it.** Try out your new quick action. Does it should at least open this page ... which doesn't have much (or anything, really).
@@ -160,17 +158,21 @@ Write all of the following code in **src/app/(app)/(tabs)/podcasts/latest.tsx**:
 4. Query the latest podcasts, much like we do in **podcasts/index.tsx**. Switch out your `latest` screen for this:
 
 ```tsx
-import React from "react"
-import { observer } from "mobx-react-lite"
-import { Redirect } from 'expo-router';
-import { useStores } from 'src/models';
+import React from "react";
+import { observer } from "mobx-react-lite";
+import { Redirect } from "expo-router";
+import { useStores } from "src/models";
 
 export default observer(() => {
   const { episodeStore } = useStores();
   if (episodeStore.episodes.length > 0) {
-    return <Redirect href={`/(app)/(tabs)/podcasts/${episodeStore.episodes.slice()[0].guid}`} />;
+    return (
+      <Redirect
+        href={`/(app)/(tabs)/podcasts/${episodeStore.episodes.slice()[0].guid}`}
+      />
+    );
   }
-  return <Redirect href={`/(app)/(tabs)/podcasts/`} />;;
+  return <Redirect href={`/(app)/(tabs)/podcasts/`} />;
 });
 ```
 
@@ -182,13 +184,13 @@ export default observer(() => {
 
 You may have noticed your back button not working. This can happen when going directly to a deep link, as your app will not know where to go back to. Expo Router has a setting to fix this.
 
-In **src/app/(app)/(tabs)/podcast/_layout.tsx**, add this:
+In **src/app/(app)/(tabs)/podcast/\_layout.tsx**, add this:
 
 ```tsx
 // eslint-disable-next-line camelcase
 export const unstable_settings = {
   // Ensure any route can link back to `/`
-  initialRouteName: 'index',
+  initialRouteName: "index",
 };
 ```
 
