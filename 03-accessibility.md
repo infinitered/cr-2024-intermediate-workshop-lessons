@@ -71,7 +71,7 @@ Common gestures:
 - Swipe left: go to previous control
 - Single tap: focus control
 - Double tap: select / interact with control
-- ???: Go to home screen
+- Drag one finger up from the bottom edge of the screen until you feel a vibration or hear two rising tones, then lift your finger : go to home screen
 
 > Use `npx expo run:ios --device` to build the app to your USB-connected device.
 
@@ -148,7 +148,6 @@ But, the `Text` and `TextInput` controls are announcing their contents and their
 ```diff
 <Text
 +  accessibilityLabel=""
-  importantForAccessibility="no-hide-descendants"
   preset="formLabel"
   text={label}
   tx={labelTx}
@@ -359,11 +358,11 @@ Apparently, `accessibilityIncrements` must output strings that can be cast to do
 
 🏃**Try it.** Ehhh... if you have any better ideas here for how to salvage this slider, we're all ears!
 
-## Exercise 3: That modal picker thing!
+<!-- ## Exercise 3: That modal picker thing!
 
-// TODO: need some help, haha
+// TODO: need some help, haha -->
 
-## Exercise 4: Buttons and validation
+## Exercise 3: Buttons and validation
 
 By default, the button actually comes out sounding pretty good! But, let's think ahead a little to what happens when you submit the form and the data isn't valid. Let's suppose name is a required field.
 
@@ -451,10 +450,6 @@ if (Platform.OS === "android") {
   }
 }
 ```
-
-## Side Quests
-
-- Add any extra stuff to do here
 
 ## See the solution
 
