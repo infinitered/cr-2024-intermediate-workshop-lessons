@@ -274,7 +274,7 @@ func fetchImage(url: String) async throws -> UIImage {
     Task {
       // Notice the App Group is used here
       let userDefaults = UserDefaults(suiteName: "group.cr2024im.data")
-      // And the key for the data that we use in the Zustand store.
+      // And the key for the data that we use in the MST store.
       let episodesJsonString = userDefaults?.string(forKey: "episodes") ?? "[]"
 
       let decoded: [EpisodeFromStore] = try! JSONDecoder().decode([EpisodeFromStore].self, from: Data(episodesJsonString.utf8))
