@@ -39,9 +39,25 @@ Maybe we could still save/persist the data instantly in MST, but the Submit butt
 
 # Exercises
 
-## Exercise 1: Basic keyboard avoidance with `react-native-keyboard-controller`
+## Exercise 0: Poke Around A Little
 
-Let's start by ensuring we can always see our input fields on the profile screen, especially when the keyboard is engaged. With the app running, give the profile screen a scroll and try switching between inputs. Is the keyboard in the way? Let's fix that.
+In the next 4 exercises we're going to be updating our profile form so that it's easier to use. Let's start by testing out the current behavior and try to identify what's not working. Poke around in the code a little. Try filling out the form on your simulator or device.
+
+What is already implemented to make the form more user friendly? What could be improved?
+
+Here are some things to get your mind going:
+
+- Are the different types of inputs clear?
+- Can we access / see the text fields when we're typing?
+- How easy is it to get from input to input?
+- Does the type of input suit the data it's asking for?
+- What happens when I try to close the keyboard?
+
+</br>
+
+The existing `KeyboardAvoidingView` doesn't seem to be doing much when we go to use the text inputs. Let's get started fixing that behavior in our first exercise!
+
+## Exercise 1: Basic keyboard avoidance with `react-native-keyboard-controller`
 
 ### Add Keyboard Provider
 
@@ -110,12 +126,6 @@ export function Screen(props: ScreenProps) {
 > [!NOTE]
 > This works great for some views, keeping floating buttons at the bottom of a view when the keyboard is open for example, but has trouble managing on views with scrolling so we need another solution.
 
-<details><summary>Bad Keyboard Avoidance Demo</summary>
-<video width=300 src=./files/02/KeyboardAvoidingViewFail.mp4 />
-</details>
-
-<br/>
-
 To fix this, let's head into the `ScreenWithScrolling` component (in the same file, just up above) and replace the existing `Scrollview` with a `KeyboardAwareScrollView`. We can keep all the existing props, and see how this helps.
 
 ```tsx
@@ -132,19 +142,14 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 🏃**Try it.** How does it look? Is it perfect? Probably not. What issues are you seeing?
 
-<details><summary>Somewhat Better Keyboard Avoidance</summary>
-<video width=300 src=./files/02/KeyboardAwareScrollView1.mp4 />
-</details>
-<br/>
-
 ### Pad for extra viewing comfort
 
 We're getting somewhere now, but let's add some padding to offset the bottom of the text fields just a little so we don't have any cutoff.
 
-1. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
-2. Destructure that prop in our `ScreenWithScrolling` component, preferably with a default of 0
-3. Pass `bottomOffset` in to the `KeyboardAwareScrollView`
-4. In _src/app/(app)/(tabs)/profile.tsx_ add a 16px `bottomOffset` prop to the `Screen` component.
+3. Add an optional prop to `ScrollScreenProps` called `bottomOffset` of type number
+4. Destructure that prop in our `ScreenWithScrolling` component, preferably with a default of 0
+5. Pass `bottomOffset` in to the `KeyboardAwareScrollView`
+6. In **src/app/(app)/(tabs)/profile.tsx** add a 16px `bottomOffset` prop to the `Screen` component.
 
 ```diff
 <Screen
@@ -201,7 +206,7 @@ A toolbar with arrows to navigate between text fields and a clear button to clos
 
 Since we don't necessarily want a toolbar on every scrolling screen (ie. even the ones without inputs), let's add it directly to our Profile screen.
 
-In _src/app/(app)/(tabs)/profile.tsx_:
+In **src/app/(app)/(tabs)/profile.tsx**:
 
 1. Wrap the `Screen` component in a fragment
 2. Import `KeyboardToolbar` from `react-native-keyboard-controller`
@@ -239,9 +244,9 @@ Since we added the `KeyboardToolbar` outside of the `Screen` component, we need 
       >
 ```
 
-And there you have it, keyboard avoidance and moving from field to field without covering inputs for a form that is much easier to use.
+🏃**Try it.** And there you have it, keyboard avoidance and moving from field to field without covering inputs for a form that is much easier to use.
 
-## Exercise 3: New dropdown component
+## Exercise 3a: New dropdown component
 
 For the next exercise we're going to switch gears and improve one of our form fields. The skills input is mediocre, especially if you type out more than a couple skills. A single text string with a comma separated list just isn't the right type or display for this data.
 
@@ -302,11 +307,11 @@ export const SelectField = observer(
 );
 ```
 
-2. Export the component from _src/components/index.ts_
+2. Export the component from **src/components/index.ts**
 
 3. Add a SelectField to our Profile screen so we can monitor our progress as we build it.
 
-In _src/app/(app)/(tabs)/profile.tsx:_
+In **src/app/(app)/(tabs)/profile.tsx**:
 
 - Add a `SelectField` right below the existing skills `TextField`.
 - Copy over the label from the `Text` component into the `labelTx` prop
@@ -375,15 +380,15 @@ const valueString =
     .join(", ");
 ```
 
-Update the `TextField` to use this as the displayed value.
+5. Update the `TextField` to use this as the displayed value.
 
 ### Update Profile Screen SelectField
 
 Now that we've added a bit to the `SelectField` (ie. our souped up `TextField`) let's add some more data!
 
-In _src/app/(app)/(tabs)/profile.tsx:_
+In **src/app/(app)/(tabs)/profile.tsx**:
 
-- We need some data, copy the following into a constant at the top of the file.
+6. We need some data, copy the following into a constant at the top of the file.
 
 <details><summary>Skills List</summary>
 
@@ -433,10 +438,10 @@ const skillsList: {
 </details>
 <br/>
 
-- Pass our new `skillsList` in for the `options` property
-- The value should be set to skills from our `Profile` model.
-- Add an `onSelect` prop that takes in `selected` and passes that through the `setProp` action for skills.
-- Remove the old skill `TextField` and `Text` label above it.
+7. Pass our new `skillsList` in for the `options` property
+8. The value should be set to skills from our `Profile` model.
+9. Add an `onSelect` prop that takes in `selected` and passes that through the `setProp` action for skills.
+10. Remove the old skill `TextField` and `Text` label above it.
 
 So far your select field should look like this:
 
@@ -451,13 +456,15 @@ So far your select field should look like this:
 
 But now our `Profile` model is out of sync with the data we are providing it. Let's go update that!
 
-In _src/models/Profile.ts_:
+In **src/models/Profile.ts**:
 
-- update the `skills` prop to be an optional array of strings
+11. Update the `skills` prop to be an optional array of strings
 
 ```tsx
 types.optional(types.array(types.string), []);
 ```
+
+## Exercise 3b: Bottom Sheet Selection component
 
 ### Add the Sheet Components
 
@@ -475,6 +482,8 @@ We also need to wrap everything in `ReactNativeGestureHandler` so let's do that 
 
 In **src/app/\_layout.tsx**:
 
+1. Add the `ReactNativeGestureHandler` and `KeyboardProvider` wrappers
+
 ```tsx
 <ReactNativeGestureHandler>
   <KeyboardProvider>
@@ -489,31 +498,35 @@ In **src/app/\_layout.tsx**:
 
 Now we will add the UI components that will display our options. This will be a basic example and we'll customize it a bit later.
 
+2. Update the imports:
+
 ```diff
-+import { BottomSheetBackdrop, BottomSheetFlatList,  BottomSheetFooter,  BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
 import { TouchableOpacity, View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite"
+import { Icon } from "./Icon";
+import { TextField, TextFieldProps } from "./TextField";
++import { BottomSheetBackdrop, BottomSheetFlatList,  BottomSheetFooter,  BottomSheetModal } from "@gorhom/bottom-sheet";
 +import { useSafeAreaInsets } from "react-native-safe-area-context";
 +import { spacing } from "../theme";
 +import { Button } from "./Button";
-import { Icon } from "./Icon";
 +import { ListItem } from "./ListItem";
-import { TextField, TextFieldProps } from "./TextField";
+```
 
-export interface SelectFieldProps
-  extends Omit<TextFieldProps, "ref" | "onValueChange" | "onChange" | "value"> {
-  value?: string[];
-  renderValue?: (value: string[]) => string;
-  onSelect?: (newValue: string[]) => void;
-  multiple?: boolean;
-  options: { label: string; value: string }[];
-}
+3. Update the SelectFieldRef interface:
+
+```diff
 export interface SelectFieldRef {
 +  presentOptions: () => void;
 +  dismissOptions: () => void;
 }
+```
 
+4. Add the BottomSheetModal below our display `TextField`:
+
+(We know this is a doozy of a diff, the full file is available to copy at the end of this section)
+
+```diff
 export const SelectField = observer(forwardRef(function SelectField(
   props: SelectFieldProps,
   ref: Ref<SelectFieldRef>
@@ -614,6 +627,11 @@ export const SelectField = observer(forwardRef(function SelectField(
     </>
   );
 }))
+```
+
+Add the styling:
+
+```diff
 
 +const $bottomSheetFooter: ViewStyle = {
 +  paddingHorizontal: spacing.lg,
@@ -625,11 +643,156 @@ export const SelectField = observer(forwardRef(function SelectField(
 +};
 ```
 
+<details><summary>Full SelectField.tsx File</summary>
+
+```tsx
+import {
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+  BottomSheetFooter,
+  BottomSheetModal,
+} from "@gorhom/bottom-sheet";
+import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
+import { TouchableOpacity, View, ViewStyle } from "react-native";
+import { observer } from "mobx-react-lite";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { spacing } from "../theme";
+import { Button } from "./Button";
+import { Icon } from "./Icon";
+import { ListItem } from "./ListItem";
+import { TextField, TextFieldProps } from "./TextField";
+
+export interface SelectFieldProps
+  extends Omit<TextFieldProps, "ref" | "onValueChange" | "onChange" | "value"> {
+  value?: string[];
+  renderValue?: (value: string[]) => string;
+  onSelect?: (newValue: string[]) => void;
+  multiple?: boolean;
+  options: { label: string; value: string }[];
+}
+export interface SelectFieldRef {
+  presentOptions: () => void;
+  dismissOptions: () => void;
+}
+
+export const SelectField = observer(
+  forwardRef(function SelectField(
+    props: SelectFieldProps,
+    ref: Ref<SelectFieldRef>
+  ) {
+    const {
+      value = [],
+      onSelect,
+      renderValue,
+      options = [],
+      multiple = true,
+      ...TextFieldProps
+    } = props;
+    const sheet = useRef<BottomSheetModal>(null);
+    const { bottom } = useSafeAreaInsets();
+
+    const disabled =
+      TextFieldProps.editable === false || TextFieldProps.status === "disabled";
+
+    useImperativeHandle(ref, () => ({ presentOptions, dismissOptions }));
+
+    const valueString =
+      renderValue?.(value) ??
+      value
+        .map((v) => options.find((o) => o.value === v)?.label)
+        .filter(Boolean)
+        .join(", ");
+
+    function presentOptions() {
+      if (disabled) return;
+      sheet.current?.present();
+    }
+
+    function dismissOptions() {
+      sheet.current?.dismiss();
+    }
+
+    return (
+      <>
+        <TouchableOpacity activeOpacity={1} onPress={presentOptions}>
+          <View pointerEvents="none">
+            <TextField
+              {...TextFieldProps}
+              value={valueString}
+              RightAccessory={(props) => (
+                <Icon icon="caretRight" containerStyle={props.style} />
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <BottomSheetModal
+          ref={sheet}
+          snapPoints={["50%"]}
+          stackBehavior="replace"
+          enableDismissOnClose
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+            />
+          )}
+          footerComponent={
+            !multiple
+              ? undefined
+              : (props) => (
+                  <BottomSheetFooter
+                    {...props}
+                    style={$bottomSheetFooter}
+                    bottomInset={bottom}
+                  >
+                    <Button
+                      text="Dismiss"
+                      preset="reversed"
+                      onPress={dismissOptions}
+                    />
+                  </BottomSheetFooter>
+                )
+          }
+        >
+          <BottomSheetFlatList
+            style={{ marginBottom: bottom + (multiple ? spacing.xl * 2 : 0) }}
+            data={options}
+            keyExtractor={(o) => o.value}
+            renderItem={({ item, index }) => (
+              <ListItem
+                text={item.label}
+                topSeparator={index !== 0}
+                style={$listItem}
+              />
+            )}
+            keyboardShouldPersistTaps="always"
+          />
+        </BottomSheetModal>
+      </>
+    );
+  })
+);
+
+const $bottomSheetFooter: ViewStyle = {
+  paddingHorizontal: spacing.lg,
+  paddingBottom: spacing.xs,
+};
+
+const $listItem: ViewStyle = {
+  paddingHorizontal: spacing.lg,
+};
+```
+
+</details>
+<br/>
+
 #### Add Selected State to Options and Hook Up Callback
 
 The last step is to add the selected state to our options inside the sheet as well as hook up the callback to change the value.
 
-1. Add a function to return an array with a specific value removed:
+5. Add a function to return an array with a specific value removed:
 
 ```tsx
 function without<T>(array: T[], value: T) {
@@ -637,7 +800,7 @@ function without<T>(array: T[], value: T) {
 }
 ```
 
-2. Use that function in a new updateValue function that we will call when a user selects one of the list items
+6. Use that function in a new updateValue function that we will call when a user selects one of the list items
 
 ```tsx
 function updateValue(optionValue: string) {
@@ -650,7 +813,7 @@ function updateValue(optionValue: string) {
 }
 ```
 
-3. Update the `ListItem` within the `BottomSheetFlatList` to call `updateValue` on press and some UI sprinkles to show which items are selected.
+7. Update the `ListItem` within the `BottomSheetFlatList` to call `updateValue` on press and some UI sprinkles to show which items are selected.
 
 ```diff
 +import {spacing, color} from '../theme'
@@ -675,9 +838,9 @@ At this point it looks great, but notice when you select a large number of optio
 
 Let's update that to display the number of skills selected instead of listing them by passing in a custom `renderValue` prop
 
-Back in _src/app/(app)/(tabs)/profile.tsx_:
+Back in **src/app/(app)/(tabs)/profile.tsx**:
 
-1. The search field is a little close to its neighbors, so let's add the existing style we're using on the other inputs as well.
+8. The search field is a little close to its neighbors, so let's add the existing style we're using on the other inputs as well.
 
 ```diff
 <SelectField
@@ -690,7 +853,7 @@ renderValue={(value) => t("demoProfileScreen.skillsSelected", { count: value.len
 />
 ```
 
-2. Add a renderValue prop with the following function for displaying the number of items selected.
+9. Add a renderValue prop with the following function for displaying the number of items selected.
 
 ```diff
 <SelectField
@@ -702,7 +865,7 @@ value={skills}
 />
 ```
 
-3. That's a new txKey so in _srx/i18n/en.ts_ add the following in the `demoProfileScreen` dictionary.
+10. That's a new txKey so in _srx/i18n/en.ts_ add the following in the `demoProfileScreen` dictionary.
 
 ```tsx
 skillsSelected: {
@@ -713,13 +876,13 @@ skillsSelected: {
 
 Looks good now! Try selecting, 0, 1, and many options to see it update accordingly.
 
-4. The list of skills is hard to read through, let's sort it so that our list is alphabetical.
+11. The list of skills is hard to read through, let's sort it so that our list is alphabetical.
 
 ## Exercise 4: Full text search in the dropdown
 
 For our last piece of our form, we're going to update our `SelectField` a little more and make it easier for users to find certain skills with a search bar!
 
-In _src/components/SelectField.tsx_:
+In **src/components/SelectField.tsx**:
 
 ### Set Up for Searchability
 
@@ -733,7 +896,7 @@ In _src/components/SelectField.tsx_:
 
 ### Add Search Header to Bottom Sheet Modal
 
-1. Add a `ListHeaderComponent` prop on the `BottomSheetFlatList` that renders if `searchable` is `true`
+5. Add a `ListHeaderComponent` prop on the `BottomSheetFlatList` that renders if `searchable` is `true`
 
 ```tsx
 <BottomSheetFlatList
@@ -777,7 +940,7 @@ const $searchClearButton: ViewStyle = {
 
 This looks a little tight with the 50% snapPoint we have set, why don't we make it almost full screen if the list is searchable.
 
-2. Update the snapPoints on the `BottomSheetModal` to be dynamic based on our `searchable` boolean
+6. Update the snapPoints on the `BottomSheetModal` to be dynamic based on our `searchable` boolean
 
 ```diff
 <BottomSheetModal
@@ -786,7 +949,7 @@ This looks a little tight with the 50% snapPoint we have set, why don't we make 
 />
 ```
 
-3. We want this header to stay at the top while we scroll, so let's make it sticky
+7. We want this header to stay at the top while we scroll, so let's make it sticky
 
 ```diff
 <BottomSheetFlatList
@@ -799,7 +962,7 @@ This looks a little tight with the 50% snapPoint we have set, why don't we make 
 
 Let's put this search to work and update our `BottomSheetFlatList` options to be filtered by the search input value
 
-1. Filter the options data if `searchable` is `true`
+8. Filter the options data if `searchable` is `true`
 
 ```tsx
 // Filter options for partial name if searchable is true
@@ -810,7 +973,7 @@ const filteredOptions = searchable
   : options;
 ```
 
-2. Update `BottomSheetFlatList` data property to use the new `filteredOptions`
+9. Update `BottomSheetFlatList` data property to use the new `filteredOptions`
 
 ### Clean Up Search and Fix Keyboard Dismissal
 
@@ -818,39 +981,39 @@ You might have noticed a couple oddities in the behavior when navigating through
 
 #### Clear the search when exiting/closing the modal
 
-Call `setSearchValue("")` in the following places
+10. Call `setSearchValue("")` in the following places
 
-1. `onPress` for the `BottomSheetBackdrop`
-2. Within the `dismissOptions` function before dismissal
+- `onPress` for the `BottomSheetBackdrop`
+- Within the `dismissOptions` function before dismissal
 
-Add an onDismiss prop to the `BottomSheetFlatList` that calls the `dismissOptions` function to handle the clear on drag close.
+11. Add an onDismiss prop to the `BottomSheetFlatList` that calls the `dismissOptions` function to handle the clear on drag close.
 
 #### Dismiss the keyboard when opening the `BottomSheetModal`
 
 When we are focused on a different text input when we click into the `SelectField` component, the keyboard stays up over the `BottomSheetModal`. Let's fix that!
 
-1. Add `Keyboard.dismiss()` within the `presentOptions` function
+12. Add `Keyboard.dismiss()` within the `presentOptions` function
 
 #### Skip the `SelectField` input when navigating with arrows
 
 While we technically used a `TextField` component for displaying our selected values when the bottom sheet closes, we don't want users to edit the text there. It's pretty confusing when navigating with the arrows from the `KeyboardToolbar` as well so let's fix it.
 
-1. Update the `TextField` in our `SelectField` component to not be editable
+13. Update the `TextField` in our `SelectField` component to not be editable
 
 #### Add `KeyboardToolbar` to help with closing keyboard
 
 That toolbar we added to the keyboard to navigate through our form was great so let's add one here as well. We only have one field though so no need for the arrows to jump between inputs, we'll just use the Done button.
 
-1. Add a `KeyboardToolbar` component within the `BottomSheetModal` component
-2. Hide the arrows!
+14. Add a `KeyboardToolbar` component within the `BottomSheetModal` component
+15. Hide the arrows!
 
 #### Fix bottom padding when keyboard is open to search
 
 Notice when we focus on the search `TextInput` and scroll to the bottom of our full skills list the bottom is somewhat cut off.
 
-1. Add a useState hook that stores and sets a value paddingBottom for our `BottomSheetFlatList`
-2. In the search `TextField` component, update `onFocus` and `onBlur` and to set and clear the paddingBottom value (275 is a good number to try).
-3. Add the style in the `contentContainerStyle` on the `BottomSheetFlatList`
+16. Add a useState hook that stores and sets a value paddingBottom for our `BottomSheetFlatList`
+17. In the search `TextField` component, update `onFocus` and `onBlur` and to set and clear the paddingBottom value (275 is a good number to try).
+18. Add the style in the `contentContainerStyle` on the `BottomSheetFlatList`
 
 🏃**Try it.** Does your profile form look better and behave as you would expect it to? Is the keyboard dismissing as expected and the search behaving how you imagined?
 
