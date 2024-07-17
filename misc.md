@@ -46,6 +46,34 @@ This is needed because the routing messes up due to all the tabs not being loade
   - Ah, but wait? Why isn't it working? In the conversion for Expo Router, we might have missed an import of **ignoreWarnings.ts**. Add this in the root layout: `import "src/utils/ignoreWarnings"`.
 - Creating your own config plugin: workshop snipped from App.js Conf where we basically try to recreate part of `@bacons/expo-targets`: https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=physical&mode=development-build&buildEnv=local#set-up-an-android-device-with-a-development-build
 - [Cool blog about using Expo Apple Targets in Pillar Valley](https://evanbacon.dev/blog/apple-home-screen-widgets)... also refers to Pillar Valley source code, good reference for this in action.
+
+### Notes about building signed apps with widget extensions for iOS
+
+We're using simulators and ignoring Apple teams and provisioning profiles fow now to keep things simple, focusing on the feature itself. However, for an actual production version (or even an ad-hoc testing version), you'll need real Apple signing stuff for both your main app and the app extension.
+
+You'll notice we skipped on setting the "development team" in the iOS plugin code. If you set that, it'll assign the correct development team for the extension.
+
+EAS Build will automatically apply your credentials for your main app, but doesn't automatically know to do that for your app extension. However, there is a secret property that can help with this. Set this in the `extra` in your app config:
+
+```json
+"eas": {
+  "build": {
+    "experimental": {
+      "ios": {
+        "appExtensions": [
+          {
+            "bundleIdentifier": "com.expo.appjs24-workflows-workshop",
+            "targetName": "HelloWidget",
+            "entitlements": {
+              "com.apple.security.application-groups": ["group.appjs24-workflows-workshop"]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
  
 ## Other
 - How to add a little bit of Expo to an RNC CLI app: https://github.com/keith-kurak/AddSomeExpo2023
