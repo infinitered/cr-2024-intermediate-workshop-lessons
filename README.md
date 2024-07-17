@@ -2,7 +2,7 @@
 
 ## Slides and contact
 - [Find me on Expo Discord](https://chat.expo.dev) - I'm "keith".
-- [Keith on X]([http](https://twitter.com/llamaluvr)
+- [Keith on X](https://twitter.com/llamaluvr)
 - [Slides](https://docs.google.com/presentation/d/1DXE0m-424Hhwpq0MrFepqdhNSuUeEjIuk4q33lse7eI/edit?usp=sharing)
 
 Workshop exercises for the Chain React 2024 Intermediate Workshop.
