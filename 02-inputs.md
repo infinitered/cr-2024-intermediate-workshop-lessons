@@ -478,20 +478,20 @@ Since we will be using the `BottomSheetModal` component instead of `BottomSheet`
 
 We're going to need our keyboard avoiding behavior in a later step, so make sure to add the provider nested within the existing `KeyboardProvider`.
 
-We also need to wrap everything in `ReactNativeGestureHandler` so let's do that as well.
+We also need to wrap everything in `GestureHandlerRootView` so let's do that as well.
 
 In **src/app/\_layout.tsx**:
 
 1. Add the `ReactNativeGestureHandler` and `KeyboardProvider` wrappers
 
 ```tsx
-<ReactNativeGestureHandler>
+<GestureHandlerRootView>
   <KeyboardProvider>
     <BottomSheetModalProvider>
       <Slot />
     </BottomSheetModalProvider>
   </KeyboardProvider>
-</ReactNativeGestureHandler>
+</GestureHandlerRootView>
 ```
 
 #### Add the Necessary Components to `SelectField`
