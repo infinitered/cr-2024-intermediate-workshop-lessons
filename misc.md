@@ -12,6 +12,9 @@ The same concepts we covered about when to run `prebuild` / `npx expo run:ios|an
 
 This wouldn't scale well to the iOS widget creation part of Module 5... there's just too much native code iteration going on.
 
+### Other workshop
+- Build a Firebase-enabled chat app with the Ignite starter: [Freaky Fast Full Stack with the FERNI Stack](https://github.com/keith-kurak/ferni-chat-2023)
+
 ## Module 02
 
 ## Module 03
