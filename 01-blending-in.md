@@ -713,7 +713,7 @@ function $textStyle({
 
 <br />
 
-🏃**Try it.** Now that you've styled the `<Button />` component, toggle the theme back and forth from the `profile` route. Observe the button text changes from dark to light and the background from light to dark.
+🏃**Try it.** Now that you've styled the `<Button />` component, toggle the theme back and forth from the `profile` route. Observe the button background changes from dark to light.
 
 You're on your way now! Complete the rest of the necessary components for the `podcast` screen. You'll see that as you tackle these components, the rest of the app will begin changing as an added bonus!
 
