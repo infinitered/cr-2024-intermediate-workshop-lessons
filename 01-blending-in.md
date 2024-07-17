@@ -28,6 +28,10 @@ Let's make our app feel more cohesive with the operating system by respecting th
 
 # Exercises
 
+## Exercise -1: Build the app (if you haven't already)
+1. `yarn`
+2. `npx expo run:ios` or `npx expo run:android`
+
 ## Exercise 0: Drop in some dark mode compatible assets
 
 We'll need some dark mode assets later in this lesson. Copy the `sad-face-dark*.png` files from `files/01` into the project's `assets/images` directory
