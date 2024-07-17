@@ -21,6 +21,25 @@ This wouldn't scale well to the iOS widget creation part of Module 5... there's 
 
 ## Module 04
 
+**(tabs)/_layout.tsx**: add `lazy: true` to options to make the back routing work from a cold start.
+
+```diff
+<Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: [$tabBar, { height: bottom + 70 }],
+        tabBarActiveTintColor: colors.text,
+        tabBarInactiveTintColor: colors.text,
+        tabBarLabelStyle: $tabBarLabel,
+        tabBarItemStyle: $tabBarItem,
++        lazy: false
+      }}
+    >
+```
+
+This is needed because the routing messes up due to all the tabs not being loaded at start. This is why lazy tab loading often makes me upset :).
+
 ## Module 05
 
 - `Bound renderChildren: Support for defaultProps ...` warning when navigating to Podcast detail screen. Turns out this is just an open issue with `react-native-render-html` (https://github.com/meliorence/react-native-render-html/issues/661). It's more annoying than an actual issue at the moment. So add `"Support for defaultProps"` to **ignoreWarnings.ts**.
