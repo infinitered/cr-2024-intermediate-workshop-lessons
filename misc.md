@@ -74,6 +74,15 @@ EAS Build will automatically apply your credentials for your main app, but doesn
   }
 }
 ```
+
+### Making Xcode widget preview not take forever to load (partial)
+The concept (haven't verified this yet)
+1. Create a Prebuild template without the React Native cocoapods linked
+2. Use that template when running prebuild
+3. Open Xcode
+4. Work on your widget swift file with live preview.
+
+One part: [how to create an alternative template for prebuild](https://github.com/expo/fyi/blob/main/prebuild-without-npm-access.md)
  
 ## Other
 - How to add a little bit of Expo to an RNC CLI app: https://github.com/keith-kurak/AddSomeExpo2023
