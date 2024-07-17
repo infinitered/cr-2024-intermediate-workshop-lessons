@@ -47,3 +47,4 @@ This is needed because the routing messes up due to all the tabs not being loade
  
 ## Other
 - How to add a little bit of Expo to an RNC CLI app: https://github.com/keith-kurak/AddSomeExpo2023
+- Android environment setup (specifically JDK version): https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=physical&mode=development-build&buildEnv=local#set-up-an-android-device-with-a-development-build
